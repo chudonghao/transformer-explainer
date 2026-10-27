@@ -158,6 +158,7 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 				});
 				if (!isCurrent()) return;
 				switching = false;
+				updateSampling();
 				if (get(isMobile)) {
 					isFetchingModel.set(false);
 					return;
