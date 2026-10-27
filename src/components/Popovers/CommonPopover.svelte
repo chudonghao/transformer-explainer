@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import classNames from 'classnames';
 	import { Popover } from 'flowbite-svelte';
 	import type { PopoverProps } from 'flowbite-svelte/Popover.svelte';
@@ -63,7 +64,7 @@
 					})}
 				data-click={`read-more-btn-${className}`}
 			>
-				Read more
+				{$t('ui.readMore')}
 			</div>
 		{/if}
 	</div></Popover

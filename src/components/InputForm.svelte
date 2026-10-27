@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { Dropdown, DropdownItem, ButtonGroup } from 'flowbite-svelte';
 	import Temperature from './Temperature.svelte';
 
@@ -147,7 +148,7 @@
 				class:selectDisabled
 				class="select-button inline-flex shrink-0 items-center justify-center border border-s-0 border-gray-200 bg-white px-3 py-2 text-center text-xs font-medium text-gray-900 first:rounded-s-lg first:border-s last:rounded-e-lg"
 			>
-				Examples<ChevronDownOutline class="pointer-events-none h-4 w-4 text-gray-500" />
+				{$t('ui.examples')}<ChevronDownOutline class="pointer-events-none h-4 w-4 text-gray-500" />
 			</button>
 			<Dropdown bind:open={dropdownOpen} class="example-dropdown">
 				{#each inputTextExample as text, index}
@@ -180,7 +181,7 @@
 						bind:this={inputRef}
 						contenteditable={!disabled}
 						class="text-box"
-						placeholder="Test your own input text"
+						placeholder={$t('ui.inputPlaceholder')}
 						on:focus={onFocusInput}
 						on:input={onInput}
 						on:keydown={handleKeyDown}
@@ -211,15 +212,11 @@
 					<div class="loading"><LoadingDots /></div>
 				{/if}
 				{#if $isMobile}
-					<span class="helper-text"
-						>Try the examples. Please use a desktop computer to input GPT-2 prompts directly.</span
-					>
+					<span class="helper-text">{$t('ui.desktopRequired')}</span>
 				{:else if $isLoaded && $isFetchingModel}
-					<span class="helper-text"
-						>Try the examples while GPT-2 model is being downloaded (600MB)</span
-					>
+					<span class="helper-text">{$t('ui.modelDownloading')}</span>
 				{:else if exceedLimit}
-					<span class="helper-text">You can enter up to {wordLimit} words.</span>
+					<span class="helper-text">{$t('ui.inputLimit', { count: wordLimit })}</span>
 				{/if}
 			</div>
 		</ButtonGroup>
@@ -233,7 +230,7 @@
 			type="submit"
 			on:click={handleSubmit}
 		>
-			Generate
+			{$t('ui.generate')}
 		</button>
 	</form>
 	<div class="parameters" data-click="input-parameters">
@@ -348,11 +345,12 @@
 	.helper-text {
 		position: absolute;
 		bottom: 0;
-		right: 0;
+		left: 0;
+		white-space: nowrap;
 		padding: 0.3rem 0;
 		transform: translate(0, 100%);
 		color: theme('colors.gray.400');
-		font-size: 0.9rem;
+		font-size: 0.75rem;
 	}
 	:global(.generate-button) {
 		padding: 0.4rem 0.8rem;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import type { PopoverProps } from 'flowbite-svelte/Popover.svelte';
 	import CommonPopover from './CommonPopover.svelte';
 
@@ -11,7 +12,7 @@
 
 <CommonPopover
 	className="ln-popover"
-	title="Layer Normalization"
+	title={$t('ui.layerNorm')}
 	{offset}
 	{triggeredBy}
 	{trigger}
@@ -19,7 +20,7 @@
 	goTo="article-ln"
 >
 	<div class="ln-content">
-		Normalizes layer input to have a standard distribution for stability.
+		{$t('ui.layerNormDescription')}
 	</div></CommonPopover
 >
 

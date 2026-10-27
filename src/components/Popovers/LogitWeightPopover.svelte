@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { modelMeta, tokens, rootRem } from '~/store';
 	import * as d3 from 'd3';
 	import { gsap } from '~/utils/gsap';
@@ -317,14 +318,18 @@
 	};
 </script>
 
-<WeightPopoverCard id="logits" title={'Logits'} bind:isAnimationActive {timeline} bind:isOpen>
+<WeightPopoverCard
+	id="logits"
+	title={$t('ui.logits')}
+	bind:isAnimationActive
+	{timeline}
+	bind:isOpen
+>
 	<div class="weight-popover-content flex items-center justify-start">
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				<span>Output<br />Embedding</span>
-				<HelpPopover id="hidden-states" 
-					>{`After passing through all blocks, \nthe final token's embedding vector \ncontains all the contextual information \nfrom the preceding tokens.`}</HelpPopover
-				>
+				<span>{$t('ui.output')}<br />{$t('ui.embedding')}</span>
+				<HelpPopover id="hidden-states">{$t('help.logits.embedding')}</HelpPopover>
 			</div>
 			<Matrix
 				className="hidden-state"
@@ -341,10 +346,8 @@
 		<div class="operator"><div class="symbol mul pl-3">&times;</div></div>
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				Output Projection Weights
-				<HelpPopover id="lm-head-weights" 
-					>{`Transforms the final embedding into a vocabulary distribution.\nParameters were learned in training, fixed in prediction.`}</HelpPopover
-				>
+				{$t('ui.outputWeights')}
+				<HelpPopover id="lm-head-weights">{$t('help.logits.weights')}</HelpPopover>
 			</div>
 			<div class="flex gap-0">
 				<Matrix
@@ -365,9 +368,7 @@
 		<div class="operator"><div class="symbol plus">+</div></div>
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				Output Projection Bias<HelpPopover id="lm-head-bias" 
-					>{`Offsets added after the transformation.\nParameters were learned in training, fixed in prediction.`}</HelpPopover
-				>
+				{$t('ui.outputBias')}<HelpPopover id="lm-head-bias">{$t('help.logits.bias')}</HelpPopover>
 			</div>
 			<Matrix
 				className="lm-head-bias"
@@ -385,10 +386,8 @@
 		<div class="operator"><div class="symbol equal">=</div></div>
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				Logits
-				<HelpPopover id="logits" 
-					>{`Raw scores representing the model’s preference \nfor each vocabulary token before applying softmax.`}</HelpPopover
-				>
+				{$t('ui.logits')}
+				<HelpPopover id="logits">{$t('help.logits.scores')}</HelpPopover>
 			</div>
 			<div class="flex">
 				<Matrix

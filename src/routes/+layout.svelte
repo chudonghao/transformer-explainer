@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { initializeLocale, locale, t } from '~/i18n';
 	import '~/styles/app.css';
 	import '~/styles/global.scss';
 	import Topbar from '~/components/Topbar.svelte';
@@ -21,6 +22,10 @@
 	let target: HTMLElement;
 
 	onMount(() => {
+		initializeLocale();
+		const unsubscribeLocale = locale.subscribe((value) => {
+			document.documentElement.lang = value;
+		});
 		isLoaded.set(true);
 
 		const userIdParam = $page.url.searchParams.get('userId');
@@ -46,6 +51,7 @@
 		window.addEventListener('scroll', handleMobileScrollX);
 
 		return () => {
+			unsubscribeLocale();
 			intersectionObserver.disconnect();
 			window.removeEventListener('scroll', handleMobileScrollX);
 		};
@@ -65,6 +71,16 @@
 		scrollLeft = window.scrollX || document.documentElement.scrollLeft;
 	};
 </script>
+
+<svelte:head>
+	<title>{$t('ui.pageTitle')}</title>
+	<meta name="title" content={$t('ui.pageTitle')} />
+	<meta name="description" content={$t('ui.pageDescription')} />
+	<meta property="og:title" content={$t('ui.pageTitle')} />
+	<meta property="og:description" content={$t('ui.pageDescription')} />
+	<meta property="twitter:title" content={$t('ui.pageTitle')} />
+	<meta property="twitter:description" content={$t('ui.pageDescription')} />
+</svelte:head>
 
 <GTM />
 <div
@@ -112,7 +128,7 @@
 	}
 
 	header {
-		min-width: var(--min-screen-width);
+		min-width: 900px;
 		width: 100%;
 		position: fixed;
 		z-index: $TOP_BAR_INDEX;

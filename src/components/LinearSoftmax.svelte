@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { Tooltip } from 'flowbite-svelte';
 	import { setContext, getContext, onMount } from 'svelte';
 	import classNames from 'classnames';
@@ -211,7 +212,7 @@
 		data-click="prob-step-title"
 	>
 		<div class="title-text flex w-max items-center gap-1">
-			Probabilities
+			{$t('ui.probabilities')}
 			<ZoomInOutline></ZoomInOutline>
 		</div>
 	</div>
@@ -235,7 +236,7 @@
 					>
 						<span>{item.token.trim() === '' ? '\u00A0' : item.token}</span>
 						<Tooltip class="softmax-tooltip" type="light">
-							Token ID: <span class="number">{tokenIds[idx]}</span>
+							{$t('ui.tokenId')} <span class="number">{tokenIds[idx]}</span>
 						</Tooltip>
 					</div>
 				{/each}
@@ -247,7 +248,7 @@
 			{#if isSoftmaxExpanded}
 				<div class="softmax-subtitle softmax-detail flex text-center text-xs opacity-0">
 					<div class="title-box token-string !justify-end">
-						<div class="title-text">Tokens</div>
+						<div class="title-text">{$t('ui.tokens')}</div>
 					</div>
 					<div class="title-box logits">
 						<div
@@ -255,12 +256,13 @@
 							on:click={onClickLogits}
 							data-click="prob-expansion-logit-btn"
 						>
-							Logits <EyeOutline class="icon text-gray-400" size="sm" />
+							{$t('ui.logits')}
+							<EyeOutline class="icon text-gray-400" size="sm" />
 						</div>
 					</div>
 					<div class="title-box scaled">
 						<TextbookTooltip id="temperature"
-							><div class="title-text">Scaled logits</div></TextbookTooltip
+							><div class="title-text">{$t('ui.scaledLogits')}</div></TextbookTooltip
 						>
 					</div>
 					<div class="title-box sampling">
@@ -272,7 +274,7 @@
 					</div>
 					<div class="title-box probability">
 						<div class="title-text mr-1">
-							{$sampling.type === 'top-k' ? 'Softmax' : 'Normalization'}
+							{$sampling.type === 'top-k' ? 'Softmax' : $t('ui.normalization')}
 						</div>
 					</div>
 				</div>
@@ -363,12 +365,13 @@
 											<span class="number" class:strike={cutoffIndex < idx}>{prob.toFixed(2)}</span>
 											{#if cutoffIndex === idx}
 												<span class="cutoff-label"
-													>sum={cumulativeProbabilities[idx]?.toFixed(2)}</span
+													>{$t('ui.sum')}{cumulativeProbabilities[idx]?.toFixed(2)}</span
 												>
 											{/if}
 										</div>
 										<Tooltip class="softmax-tooltip" type="light">
-											sum=<Katex math={`${cumulativeProbabilities[idx]?.toFixed(2)}`}></Katex>
+											{$t('ui.sum')}<Katex math={`${cumulativeProbabilities[idx]?.toFixed(2)}`}
+											></Katex>
 										</Tooltip>
 									{/if}
 								{/each}

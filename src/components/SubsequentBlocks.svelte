@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { tokens, modelMeta, isBoundingBoxActive, expandedBlock, blockIdx } from '~/store';
 	import classNames from 'classnames';
 	import { Tooltip } from 'flowbite-svelte';
@@ -29,8 +30,9 @@
 			>
 				<div class="text" class:highlight={$isBoundingBoxActive}>
 					<TextbookTooltip id="blocks">
-						<span class="strong">{$modelMeta.layer_num - $blockIdx - 1}</span> more identical<br
-						/><span class="strong">Transformer<br />Blocks</span>
+						<span class="strong"
+							>{$t('ui.remainingBlocks', { count: $modelMeta.layer_num - $blockIdx - 1 })}</span
+						>
 					</TextbookTooltip>
 				</div>
 
@@ -59,7 +61,7 @@
 				</div>
 			{/each}
 			<Tooltip class="popover" triggeredBy={'.transformer-blocks .vector'} placement="right"
-				>vector({$modelMeta.dimension})</Tooltip
+				>{$t('ui.vector', { dimension: $modelMeta.dimension })}</Tooltip
 			>
 		</div>
 		<div class="second-column">

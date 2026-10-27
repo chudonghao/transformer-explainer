@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { modelMeta, tokens, rootRem, modelData, attentionHeadIdx, blockIdx } from '~/store';
 	import * as d3 from 'd3';
 	import { gsap } from '~/utils/gsap';
@@ -20,7 +21,9 @@
 		.map((col) => Array($tokens.length).fill(-Infinity));
 
 	// generate data
-	$: softmaxed = $modelData?.outputs?.[`block_${$blockIdx}_attn_head_${$attentionHeadIdx}_attn_dropout`]?.data || placeHolderData;
+	$: softmaxed =
+		$modelData?.outputs?.[`block_${$blockIdx}_attn_head_${$attentionHeadIdx}_attn_dropout`]?.data ||
+		placeHolderData;
 
 	const visibleDimension = 8;
 	$: tokenLen = $tokens.length;
@@ -257,13 +260,13 @@
 
 <WeightPopoverCard
 	id="attention"
-	title={`Attention Head ${$attentionHeadIdx + 1} Out`}
+	title={$t('ui.headOutput', { number: $attentionHeadIdx + 1 })}
 	bind:isAnimationActive
 	{timeline}
 >
 	<div class="attention-weight-poover weight-popover-content flex items-center justify-start">
 		<div class="matrix flex flex-col items-center">
-			<div class="title">Attention</div>
+			<div class="title">{$t('ui.attention')}</div>
 			<Matrix
 				className="attention-matrix"
 				data={maskArray(softmaxed)}
@@ -287,7 +290,7 @@
 			</div>
 		</div>
 		<div class="matrix flex flex-col items-center">
-			<div class="title flex items-center gap-1">Value</div>
+			<div class="title flex items-center gap-1">{$t('ui.value')}</div>
 			<div class="flex gap-0">
 				<Matrix
 					className="value-matrix"
@@ -315,7 +318,7 @@
 			</div>
 		</div>
 		<div class="matrix flex flex-col items-center">
-			<div class="title">Out</div>
+			<div class="title">{$t('ui.out')}</div>
 			<div class="flex">
 				<Matrix
 					className="head-out-matrix"

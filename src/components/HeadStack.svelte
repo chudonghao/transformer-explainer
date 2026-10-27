@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import {
 		modelMeta,
 		headGap,
@@ -303,17 +304,22 @@
 	<div class="head-title absolute bottom-2 right-3 text-right text-gray-400">
 		<TextbookTooltip id="multi-head">
 			<span class="title-text"
-				>Head {$attentionHeadIdxTemp + 1} of {$modelMeta.attention_head_num}</span
+				>{$t('ui.headCount', {
+					current: $attentionHeadIdxTemp + 1,
+					total: $modelMeta.attention_head_num
+				})}</span
 			></TextbookTooltip
 		>
 		<button
 			on:click={onClickPrev}
 			disabled={$isOnAnimation || disablePagination}
+			aria-label={$t('ui.previousHead')}
 			data-click="attention-head-prev-btn"><AngleLeftOutline size="sm"></AngleLeftOutline></button
 		>
 		<button
 			on:click={onClickNext}
 			disabled={$isOnAnimation || disablePagination}
+			aria-label={$t('ui.nextHead')}
 			data-click="attention-head-next-btn"><AngleRightOutline size="sm"></AngleRightOutline></button
 		>
 	</div>

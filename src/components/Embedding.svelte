@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import {
 		tokens,
 		expandedBlock,
@@ -174,7 +175,7 @@
 		data-click="embedding-step-title"
 	>
 		<div class="title-text flex w-max items-center gap-1">
-			Embedding
+			{$t('ui.embedding')}
 			<ZoomInOutline></ZoomInOutline>
 		</div>
 	</div>
@@ -184,7 +185,7 @@
 			<!-- token -->
 			<div class="column token-string relative">
 				{#if isEmbeddingExpanded}<div class="subtitle embedding-detail">
-						<TextbookTooltip id="token-embedding">Tokenization</TextbookTooltip>
+						<TextbookTooltip id="token-embedding">{$t('ui.tokenization')}</TextbookTooltip>
 					</div>{/if}
 				{#each $tokens as token, index}
 					<div class="cell" class:last={index === $tokens.length - 1}>
@@ -196,7 +197,8 @@
 				<!-- token id and embedding -->
 				<div class="column token-embedding embedding-detail">
 					<div class="subtitle flex items-center gap-1">
-						<TextbookTooltip id="token-embedding"><span>Token<br />Embedding</span></TextbookTooltip
+						<TextbookTooltip id="token-embedding"
+							><span>{$t('ui.token')}<br />{$t('ui.embedding')}</span></TextbookTooltip
 						>
 						<!-- <HelpPopover
 							id="token-embedding"
@@ -244,7 +246,7 @@
 				<div class="column embedding-detail position-embedding">
 					<div class="subtitle flex gap-1">
 						<TextbookTooltip id="positional-encoding">
-							<span>Positional<br />Encoding</span>
+							<span>{$t('ui.positional')}<br />{$t('ui.encoding')}</span>
 						</TextbookTooltip>
 						<!-- <HelpPopover
 							id="position-embedding"
@@ -267,7 +269,7 @@
 							</div>
 							<span class="index-val text-xs">
 								{#if index === 0}
-									<span class="label">position</span><br />
+									<span class="label">{$t('ui.position')}</span><br />
 								{/if}
 								<span class="val">{index}</span>
 							</span>
@@ -280,7 +282,7 @@
 					{/each}
 				</div>
 				<Tooltip triggeredBy=".embedding .vector" class="popover" placement="right"
-					>vector({$modelMeta.dimension})</Tooltip
+					>{$t('ui.vector', { dimension: $modelMeta.dimension })}</Tooltip
 				>
 				<!-- <PositionalEncodingPopover triggeredBy=".position-embedding" /> -->
 			{/if}
@@ -295,7 +297,7 @@
 				{/each}
 			</div>
 			<Tooltip triggeredBy=".step.embedding .vector" class="popover" placement="right"
-				>vector({$modelMeta.dimension})</Tooltip
+				>{$t('ui.vector', { dimension: $modelMeta.dimension })}</Tooltip
 			>
 		</div>
 	</div>

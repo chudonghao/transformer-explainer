@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import classNames from 'classnames';
 	import { Popover } from 'flowbite-svelte';
 	import * as d3 from 'd3';
@@ -73,7 +74,7 @@
 	<div class="content">
 		<div class="token-container">
 			<div class="tokens">
-				<div class="subtitle">Token</div>
+				<div class="subtitle">{$t('ui.token')}</div>
 				<div class="subcontent flex flex-col">
 					{#each $tokens as token, token_idx}
 						<div
@@ -89,7 +90,7 @@
 				</div>
 			</div>
 			<div class="positions">
-				<div class="subtitle">Position</div>
+				<div class="subtitle">{$t('ui.positionCapitalized')}</div>
 				<div class="subcontent flex flex-col">
 					{#each $tokens as token, token_idx}
 						<div
@@ -105,7 +106,7 @@
 				</div>
 			</div>
 			<div class="embs">
-				<div class="subtitle">Embedding</div>
+				<div class="subtitle">{$t('ui.embedding')}</div>
 				<div class="subcontent flex flex-col">
 					{#each $tokens as token, token_idx}
 						<div
@@ -132,7 +133,7 @@
 			</div>
 		</div>
 		<div class="viz-container">
-			<div class="subtitle">Encoding Matrix</div>
+			<div class="subtitle">{$t('ui.encodingMatrix')}</div>
 			<div class="subcontent viz-subcontent">
 				<div class="chart-container mx-auto">
 					<div class="embed-dim-axis">
