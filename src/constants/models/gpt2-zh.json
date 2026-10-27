@@ -1,0 +1,16 @@
+{
+	"source": "uer/gpt2-chinese-cluecorpussmall",
+	"revision": "c2c0249d8a2731f269414cc3b22dff021f8e07a3",
+	"layer_num": 12,
+	"attention_head_num": 12,
+	"dimension": 768,
+	"vocab_size": 21128,
+	"prompts": [
+		"今天天气很好，我们",
+		"人工智能可以帮助我们",
+		"春天来了，花园里的",
+		"在遥远的宇宙中",
+		"学习新知识需要"
+	],
+	"checkpoint_sha256": "5478b950f53650c82f7f7e91010787c870813a76adeabe23c8571b01af1379b4"
+}

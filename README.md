@@ -8,7 +8,9 @@ Transformer Explainer is an interactive visualization tool designed to help anyo
 
 ## Live Demo
 
-Try Transformer Explainer: http://poloclub.github.io/transformer-explainer
+Try this bilingual fork: https://chudonghao.github.io/transformer-explainer/
+
+Original project: https://poloclub.github.io/transformer-explainer/
 
 ## Research Paper
 
@@ -41,6 +43,14 @@ This fork supports English and Simplified Chinese for the interface, tooltips, a
 Original screenshots and the embedded video remain in English, with translated captions and labels. Changing the interface language does not change model prompts, generated tokens, formulas, numerical values, or GPT-2's language capabilities.
 
 For translation resources, adding languages, and validation commands, see the [localization development guide](docs/i18n.md).
+
+## Chinese Examples and Live Generation
+
+Choose **GPT-2 · 中文** in the generation model selector to explore five Chinese examples or enter your own Chinese prompt. Desktop browsers run UER Chinese GPT-2 locally and generate one token at a time, with real attention matrices and prediction scores. English GPT-2 remains available. Model choice is separate from interface language; mobile devices use precomputed examples.
+
+The Chinese model uses a 21,128-token WordPiece vocabulary and compressed linear weights (175 MB download). Input is limited to 32 tokens to keep the visualization readable. See the [model guide](docs/models.md) for sources, conversion, validation, and behavior.
+
+To publish your own copy, follow the [GitHub Pages deployment guide](docs/deployment.md).
 
 ## Credits
 
