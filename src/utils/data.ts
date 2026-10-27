@@ -1,100 +1,88 @@
-import { PreTrainedTokenizer } from '@xenova/transformers';
+import type { PreTrainedTokenizer } from '@xenova/transformers';
 import * as ort from 'onnxruntime-web';
-import {
-	modelData,
-	tokens,
-	tokenIds,
-	isModelRunning,
-	predictedToken,
-	modelSession,
-	modelMetaMap
-} from '~/store';
+import { modelData, tokens, tokenIds, isModelRunning, predictedToken } from '~/store';
 import { get } from 'svelte/store';
+import { tick } from 'svelte';
+import { maxInputTokens } from '~/constants/models';
 import { reshapeArray } from './array';
 import { showFlowAnimation } from './animation';
+import { encodeInput, tokenLabels } from './tokenization.js';
 
 export const fakeRunWithCachedData = async ({
 	cachedData,
 	tokenizer,
-	temperature,
-	sampling
+	getParameters,
+	isCurrent = () => true
 }: {
-	cachedData: any;
+	cachedData: CachedModelData;
 	tokenizer: PreTrainedTokenizer;
-	temperature: number;
-	sampling: Sampling;
+	getParameters: () => { temperature: number; sampling: Sampling };
+	isCurrent?: () => boolean;
 }) => {
+	if (!isCurrent()) return;
 	isModelRunning.set(true);
-
-	modelData.set(cachedData);
-	tokens.set(cachedData.tokens);
-	tokenIds.set(cachedData.tokenIds);
-
-	setTimeout(async () => {
-		await showFlowAnimation(cachedData.tokens.length, true);
-		adjustTemperature({
+	try {
+		const prediction = getProbabilities({
 			tokenizer,
 			logits: cachedData.logits,
-			temperature,
-			sampling
+			...getParameters()
 		});
-		isModelRunning.set(false);
-	}, 0);
+		modelData.set({ ...cachedData, ...prediction });
+		tokens.set(cachedData.tokens);
+		tokenIds.set(cachedData.tokenIds);
+		predictedToken.set(undefined);
+		await tick();
+		if (!isCurrent()) return;
+		await showFlowAnimation(cachedData.tokens.length, false);
+		if (isCurrent()) predictedToken.set(get(modelData)?.sampled);
+	} finally {
+		if (isCurrent()) isModelRunning.set(false);
+	}
 };
 
 export const runModel = async ({
 	tokenizer,
+	session,
+	model,
 	input,
-	temperature,
-	sampling
+	getParameters,
+	isCurrent = () => true
 }: {
 	tokenizer: PreTrainedTokenizer;
-	input: string;
-	temperature: number;
-	sampling: Sampling;
+	session: ort.InferenceSession;
+	model: ModelMetaData & { wordPiece: boolean };
+	input: ModelInput;
+	getParameters: () => { temperature: number; sampling: Sampling };
+	isCurrent?: () => boolean;
 }) => {
+	if (!isCurrent()) return;
 	isModelRunning.set(true);
-
-	const { token_ids, input_tokens } = await getTokenization(tokenizer, input === '' ? ' ' : input);
-
-	let isOneTokenAdded: boolean;
-	tokens.set(input_tokens);
-	tokenIds.update((prev) => {
-		isOneTokenAdded =
-			prev.length === token_ids.length - 1 && prev.every((id, idx) => id === token_ids[idx]);
-		return token_ids;
-	});
-
-	const { logits, outputs } = await getData(token_ids);
-
-	const { probabilities, sampled } = getProbabilities({ tokenizer, logits, sampling, temperature });
-
-	modelData.set({ logits, outputs, probabilities, sampled });
-
-	// To ensure the animation starts after all elements have been rendered
-	setTimeout(async () => {
+	try {
+		const { token_ids, input_tokens } = getTokenization(tokenizer, input, model.wordPiece);
+		if (token_ids.length === 0 || token_ids.length > maxInputTokens) {
+			throw new Error(`Input must contain between 1 and ${maxInputTokens} tokens.`);
+		}
+		const previousIds = get(tokenIds);
+		const isOneTokenAdded =
+			previousIds.length === token_ids.length - 1 &&
+			previousIds.every((id, index) => id === token_ids[index]);
+		const { logits, outputs } = await getData(token_ids, session, model);
+		if (!isCurrent()) return;
+		const prediction = getProbabilities({ tokenizer, logits, ...getParameters() });
+		tokens.set(input_tokens);
+		tokenIds.set(token_ids);
+		modelData.set({ logits, outputs, ...prediction });
+		predictedToken.set(undefined);
+		await tick();
+		if (!isCurrent()) return;
 		await showFlowAnimation(input_tokens.length, isOneTokenAdded);
-
-		predictedToken.set(sampled);
-		// setPredictedTokenForAnimation(probabilities, sampled, sampling);
-
-		isModelRunning.set(false);
-	}, 0);
-};
-
-const setPredictedTokenForAnimation = (probabilities, sampled, sampling) => {
-	let delay = 10;
-	let topK = probabilities.slice(0, sampling.value);
-	let animationTokens = [...topK, ...topK.slice(sampled.rank).reverse()];
-
-	for (let i = 0; i < animationTokens.length; i++) {
-		setTimeout(() => {
-			predictedToken.set(animationTokens[i]);
-		}, i * delay);
+		if (isCurrent()) predictedToken.set(get(modelData)?.sampled);
+	} finally {
+		if (isCurrent()) isModelRunning.set(false);
 	}
 };
 
-export const adjustTemperature = async ({
+export const adjustTemperature = ({
 	tokenizer,
 	logits,
 	temperature,
@@ -105,67 +93,63 @@ export const adjustTemperature = async ({
 	temperature: number;
 	sampling: Sampling;
 }) => {
-	const { probabilities, sampled } = getProbabilities({ tokenizer, logits, sampling, temperature });
-
-	modelData.update((d) => ({ ...d, probabilities, sampled }));
-
-	predictedToken.set(sampled);
-	// setPredictedTokenForAnimation(probabilities, sampled, sampling);
+	if (!get(modelData)) return;
+	const prediction = getProbabilities({ tokenizer, logits, sampling, temperature });
+	modelData.update((data) => data && { ...data, ...prediction });
+	if (!get(isModelRunning)) predictedToken.set(prediction.sampled);
 };
 
-export const getTokenization = async (tokenizer: PreTrainedTokenizer, input: string) => {
-	const token_ids = tokenizer.encode(input);
-	const input_tokens = token_ids.map((id) => tokenizer.decode([id])).flat();
-
-	return {
-		token_ids,
-		input_tokens
-	};
+export const getTokenization = (
+	tokenizer: PreTrainedTokenizer,
+	input: ModelInput,
+	wordPiece = false
+) => {
+	const token_ids = input.tokenIds ?? encodeInput(tokenizer, input.text);
+	return { token_ids, input_tokens: tokenLabels(tokenizer, token_ids, wordPiece) };
 };
 
-export const getData = async (token_ids: number[]) => {
+export const getData = async (
+	ids: number[],
+	session: ort.InferenceSession,
+	model: ModelMetaData
+): Promise<Pick<ModelData, 'logits' | 'outputs'>> => {
+	const inputTensor = new ort.Tensor('int64', BigInt64Array.from(ids.map(BigInt)), [1, ids.length]);
+	let results: Record<string, ort.Tensor> = {};
 	try {
-		// Convert token_ids to tensor
-		const inputTensor = new ort.Tensor('int64', token_ids, [1, token_ids.length]);
-
-		// Get the session from the store
-		const session = get(modelSession);
-		if (!session) {
-			throw new Error('Model session is not initialized.');
+		results = await session.run({ input: inputTensor });
+		const logits = Array.from(results.linear_output.data as Float32Array);
+		if (logits.length !== model.vocab_size)
+			throw new Error('Model vocabulary size does not match.');
+		const outputs: ModelData['outputs'] = {};
+		for (const name of attentionTensorNames(model)) {
+			const tensor = results[name];
+			if (
+				!tensor ||
+				tensor.dims.length !== 3 ||
+				tensor.dims[0] !== 1 ||
+				tensor.dims[1] !== ids.length ||
+				tensor.dims[2] !== ids.length
+			) {
+				throw new Error(`Missing or invalid attention output: ${name}`);
+			}
+			outputs[name] = { data: reshapeArray(Array.from(tensor.data as Float32Array), tensor.dims) };
 		}
-
-		// Prepare the feeds (inputs)
-		const feeds = { input: inputTensor };
-
-		// Run inference
-		const results = await session.run(feeds);
-
-		// Extract the logits
-		const logits = results['linear_output'].data;
-
-		// Extract the dictionary values
-		const outputs = targetTensors.reduce(
-			(obj, key) => {
-				const out = results[key];
-				const processedData = {
-					// ...out,
-					data: reshapeArray([...out.cpuData], out.dims)
-				};
-				obj[key] = processedData;
-				return obj;
-			},
-			{} as ModelData['outputs']
-		);
-
-		return {
-			logits,
-			outputs
-		};
-	} catch (error) {
-		console.error('Error during inference:', error.message);
-		throw error;
+		return { logits, outputs };
+	} finally {
+		inputTensor.dispose();
+		for (const tensor of Object.values(results)) tensor.dispose();
 	}
 };
+
+export function attentionTensorNames(model: ModelMetaData) {
+	return Array.from({ length: model.layer_num }, (_, layer) =>
+		Array.from({ length: model.attention_head_num }, (_, head) =>
+			['attn', 'attn_scaled', 'attn_masked', 'attn_softmax', 'attn_dropout'].map(
+				(stage) => `block_${layer}_attn_head_${head}_${stage}`
+			)
+		).flat()
+	).flat();
+}
 
 export const getProbabilities = ({
 	tokenizer,
@@ -333,79 +317,3 @@ function randomChoice(items: Probabilities): Probability {
 	// Fallback in case of numerical issues
 	return items[items.length - 1];
 }
-
-const attentionTensors = Array(modelMetaMap.gpt2.layer_num)
-	.fill(0)
-	.flatMap((_, i) => {
-		return Array(modelMetaMap.gpt2.attention_head_num)
-			.fill(0)
-			.flatMap((_, j) => [
-				`block_${i}_attn_head_${j}_attn`,
-				`block_${i}_attn_head_${j}_attn_scaled`,
-				`block_${i}_attn_head_${j}_attn_masked`,
-				`block_${i}_attn_head_${j}_attn_softmax`,
-				`block_${i}_attn_head_${j}_attn_dropout`
-			]);
-	});
-
-const targetTensors = [...attentionTensors];
-
-// const targetTensors = [
-// 'tok_emb',
-// 'transformer_wpe_weight',
-// 'pos_emb',
-// 'input_emb',
-// 'input_emb_dropout',
-// 'block_0_ln_1_input_mean',
-// 'block_0_ln_1_input_var',
-// 'block_0_ln_1_input_normalized',
-// 'block_0_ln_1_weight',
-// 'block_0_ln_1_bias',
-// 'block_0_ln_1_output',
-// 'block_0_attn_head_0_q_weights',
-// 'block_0_attn_head_0_k_weights',
-// 'block_0_attn_head_0_v_weights',
-// 'block_0_attn_head_0_q_bias',
-// 'block_0_attn_head_0_k_bias',
-// 'block_0_attn_head_0_v_bias',
-// 'block_0_attn_head_0_q',
-// 'block_0_attn_head_0_k',
-// 'block_0_attn_head_0_v',
-// 'block_0_attn_head_0_q_transposed',
-// 'block_0_attn_head_0_k_transposed',
-// 'block_0_attn_head_0_v_transposed',
-// 'block_0_attn_head_0_attn',
-// 'block_0_attn_head_0_attn_scaled',
-// 'block_0_attn_head_0_attn_masked',
-// 'block_0_attn_head_0_attn_softmax',
-// 'block_0_attn_head_0_attn_dropout',
-// 'block_0_attn_head_0_v_output',
-// 'block_0_attn_v_output_combined',
-// 'block_0_attn_proj_weights',
-// 'block_0_attn_proj_bias',
-// 'block_0_attn_attn_output',
-// 'block_0_res_1',
-// 'block_0_ln_2_input_mean',
-// 'block_0_ln_2_input_var',
-// 'block_0_ln_2_input_normalized',
-// 'block_0_ln_2_weight',
-// 'block_0_ln_2_bias',
-// 'block_0_ln_2_output',
-// 'block_0_mlp_linear_1_weight',
-// 'block_0_mlp_linear_1_bias',
-// 'block_0_mlp_linear_1_output',
-// 'block_0_mlp_gelu_output',
-// 'block_0_mlp_linear_2_weight',
-// 'block_0_mlp_linear_2_bias',
-// 'block_0_mlp_linear_2_output',
-// 'block_0_mlp_output_after_dropout',
-// 'block_0_res_2',
-// 'ln_f_input_mean',
-// 'ln_f_input_var',
-// 'ln_f_input_normalized',
-// 'ln_f_weight',
-// 'ln_f_bias',
-// 'ln_f_output',
-// 'linear_weight',
-// 	'linear_output'
-// ];

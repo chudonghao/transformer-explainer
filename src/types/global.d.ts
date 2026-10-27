@@ -13,10 +13,15 @@ type Flow = {
 
 type MatrixData = number[][];
 
+interface Window {
+	dataLayer?: Record<string, unknown>[];
+}
+
 type ModelMetaData = {
 	layer_num: number;
 	attention_head_num: number;
 	dimension: number;
+	vocab_size: number;
 	chunkTotal?: number;
 };
 
@@ -50,9 +55,21 @@ type Probability = {
 type Probabilities = Probability[];
 type ModelData = {
 	logits: number[];
-	outputs: Record<string, { data: number[][]; dims: number[]; size: number }>;
+	outputs: Record<string, { data: number[][]; dims?: number[]; size?: number }>;
 	probabilities: Probabilities;
 	sampled: Probability;
 };
 
 type Sampling = { type: 'top-k' | 'top-p'; value: number };
+
+type ModelInput = {
+	text: string;
+	// Preserve generated token boundaries until the user edits the text.
+	tokenIds?: number[];
+};
+
+type CachedModelData = Pick<ModelData, 'logits' | 'outputs'> & {
+	prompt: string;
+	tokens: string[];
+	tokenIds: number[];
+};

@@ -1,4 +1,5 @@
 import type { MessageKey, RichTextKey } from '~/i18n';
+import type { ModelId } from '~/constants/models';
 import { get } from 'svelte/store';
 import {
 	expandedBlock,
@@ -24,6 +25,7 @@ export interface TextbookPage {
 	id: string;
 	title: MessageKey;
 	content?: RichTextKey;
+	modelContent?: Partial<Record<ModelId, RichTextKey>>;
 	component?: any;
 	timeoutId?: number;
 	on: () => void;
@@ -121,6 +123,7 @@ export const textPages: TextbookPage[] = [
 		id: 'token-embedding',
 		title: 'tutorial.token-embedding.title',
 		content: 'tutorial.token-embedding.content',
+		modelContent: { 'gpt2-zh': 'tutorial.token-embedding-chinese.content' },
 		on: function () {
 			const selectors = [
 				'.token-column .column.token-string',
@@ -360,6 +363,7 @@ export const textPages: TextbookPage[] = [
 		id: 'output-logit',
 		title: 'tutorial.output-logit.title',
 		content: 'tutorial.output-logit.content',
+		modelContent: { 'gpt2-zh': 'tutorial.output-logit-chinese.content' },
 		on: () => {
 			highlightElements(['g.path-group.softmax', '.column.final']);
 		},

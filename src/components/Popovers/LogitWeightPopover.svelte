@@ -363,7 +363,9 @@
 				/>
 			</div>
 
-			<div class="size">({$modelMeta.dimension}, 50,257)</div>
+			<div class="size">
+				({$modelMeta.dimension}, {$modelMeta.vocab_size.toLocaleString('en-US')})
+			</div>
 		</div>
 		<div class="operator"><div class="symbol plus">+</div></div>
 		<div class="matrix flex flex-col items-center">
@@ -381,7 +383,7 @@
 				colorScale={weightColorScale}
 				highlightRow={highlightCol}
 			/>
-			<div class="size">(50,257)</div>
+			<div class="size">({$modelMeta.vocab_size.toLocaleString('en-US')})</div>
 		</div>
 		<div class="operator"><div class="symbol equal">=</div></div>
 		<div class="matrix flex flex-col items-center">
@@ -404,7 +406,7 @@
 					{highlightRow}
 				/>
 			</div>
-			<div class="size">(1, 50,257)</div>
+			<div class="size">(1, {$modelMeta.vocab_size.toLocaleString('en-US')})</div>
 		</div>
 	</div>
 	<div class="formula">

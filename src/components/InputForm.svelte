@@ -5,15 +5,13 @@
 
 	import { ChevronDownOutline } from 'flowbite-svelte-icons';
 	import {
-		inputText,
+		modelInput,
 		isModelRunning,
 		predictedToken,
 		inputTextExample,
 		isFetchingModel,
 		expandedBlock,
 		selectedExampleIdx,
-		isLoaded,
-		isOnAnimation,
 		isMobile,
 		weightPopover,
 		sampling,
@@ -21,6 +19,14 @@
 		blockIdx,
 		temperature,
 		tokenIds,
+		modelTokenizer,
+		modelSession,
+		modelMeta,
+		modelError,
+		modelReload,
+		modelDownloadProgress,
+		selectedModel,
+		isOnBlockTransition,
 		userId
 	} from '~/store';
 	import LoadingDots from './common/LoadingDots.svelte';
@@ -28,44 +34,68 @@
 	import Sampling from './Sampling.svelte';
 	import { completeCurrentAnimation } from '~/utils/animation';
 	import { textPages } from '~/utils/textbookPages';
+	import { models, maxInputTokens, type ModelId } from '~/constants/models';
+	import { prepareInput } from '~/utils/tokenization.js';
 
 	let inputRef: HTMLDivElement;
 	let predictRef: HTMLDivElement;
 
 	let useCustomInput = false;
 
-	$: inputTextTemp = $inputText || '';
+	let inputTextTemp = '';
+	let inputTokenIdsTemp: number[] | undefined;
+	let predictionDismissed = false;
+	$: {
+		inputTextTemp = $modelInput.text;
+		inputTokenIdsTemp = $modelInput.tokenIds;
+		predictionDismissed = false;
+	}
+	$: if (inputRef && inputRef.innerText !== inputTextTemp) inputRef.innerText = inputTextTemp;
 
-	$: predictedTokenTemp = $predictedToken?.token || '';
+	$: predictedTokenTemp = predictionDismissed ? '' : $predictedToken?.token || '';
 
-	const wordLimit = 12;
-	$: exceedLimit = inputTextTemp.split(' ').length >= wordLimit;
+	$: generationEnded =
+		!!predictedTokenTemp &&
+		!!$predictedToken &&
+		$modelMeta.endTokenIds.some((id) => id === $predictedToken.tokenId);
+	$: nextInput = $modelTokenizer
+		? prepareInput(
+				$modelTokenizer,
+				{ text: inputTextTemp, tokenIds: inputTokenIdsTemp },
+				predictedTokenTemp && !generationEnded ? $predictedToken?.tokenId : undefined,
+				$modelMeta.wordPiece
+			)
+		: { text: inputTextTemp, tokenIds: [] };
+	$: inputTokenCount = nextInput.tokenIds.length;
+	$: exceedLimit = inputTokenCount > maxInputTokens;
 
-	// Text input
-	const onFocusInput = (e) => {
-		let formattedString = (inputTextTemp + predictedTokenTemp).replace(/[\s\n]+/g, ' ');
-
-		inputTextTemp = formattedString;
-
-		// set predicted to empty
-		predictedTokenTemp = '';
-		// set input box text
+	// Focusing accepts a prediction without re-tokenizing it; editing invalidates it.
+	const onFocusInput = () => {
+		if (disabled || generationEnded) return;
+		inputTextTemp = nextInput.text;
+		inputTokenIdsTemp = nextInput.tokenIds;
+		predictionDismissed = true;
 		inputRef.innerText = inputTextTemp;
 	};
 
-	const onInput = (e) => {
+	const onInput = () => {
 		inputTextTemp = inputRef.innerText;
+		inputTokenIdsTemp = undefined;
+		predictionDismissed = true;
+		useCustomInput = true;
 	};
 
-	const handleSubmit = (e) => {
+	const handleSubmit = (e?: Event) => {
+		e?.preventDefault();
+		if (disabled || exceedLimit || generationEnded || inputTokenCount === 0) return;
 		// Complete any running animation before starting new generation
 		completeCurrentAnimation();
 
 		setTimeout(() => {
 			onFocusInput();
-			textPages.find((page) => page.id === 'how-transformers-work')?.complete();
+			textPages.find((page) => page.id === 'how-transformers-work')?.complete?.();
 
-			inputText.set(inputTextTemp);
+			modelInput.set({ text: inputTextTemp, tokenIds: inputTokenIdsTemp });
 
 			window.dataLayer?.push({
 				event: 'generate-next-token',
@@ -85,42 +115,34 @@
 		}, 0);
 	};
 
-	const handleKeyDown = (e) => {
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (e.isComposing || e.keyCode === 229) return;
 		if (e.key === 'Enter') {
 			e.preventDefault();
 			if (disabled || exceedLimit) return;
 			handleSubmit(e);
 			return;
 		}
-		useCustomInput = true;
 	};
 
 	// Example select box
 	let dropdownOpen = false;
-	const onSelectExample = (d, i) => {
+	const onSelectExample = (d: string, i: number) => {
 		if ($isFetchingModel) {
-			textPages.find((page) => page.id === 'how-transformers-work')?.complete();
+			textPages.find((page) => page.id === 'how-transformers-work')?.complete?.();
 		}
 
 		dropdownOpen = false;
 
 		selectedExampleIdx.set(i);
-		predictedTokenTemp = '';
-
-		inputTextTemp = d;
-		inputRef.innerText = inputTextTemp;
-		inputText.update((prev) => {
-			if (prev === d.trim()) {
-				return d + ' ';
-			}
-			return d.trim();
-		});
+		modelInput.set({ text: d });
 		useCustomInput = false;
 	};
 
-	const moveCursorToEnd = (element) => {
+	const moveCursorToEnd = (element: HTMLElement) => {
 		const range = document.createRange();
 		const sel = window.getSelection();
+		if (!sel) return;
 		range.selectNodeContents(element);
 		range.collapse(false);
 		sel.removeAllRanges();
@@ -128,18 +150,20 @@
 		element.focus();
 	};
 
-	$: isLoading = $isFetchingModel || $isModelRunning;
 	$: disabled =
 		$isFetchingModel ||
-		// $isModelRunning ||
+		!$modelSession ||
+		$isModelRunning ||
 		$expandedBlock.id !== null ||
 		!!$weightPopover;
-	$: selectDisabled = $isModelRunning || $expandedBlock.id !== null || !!$weightPopover;
+	$: modelSelectDisabled =
+		$isModelRunning || $isOnBlockTransition || $expandedBlock.id !== null || !!$weightPopover;
+	$: selectDisabled = modelSelectDisabled || !$modelTokenizer;
 	$: parameterDisabled = !!$weightPopover;
 </script>
 
 <div class="input-area" data-click="input-area">
-	<form class="input-form" data-click="input-form">
+	<form class="input-form" data-click="input-form" on:submit={handleSubmit}>
 		<ButtonGroup class="input-btn-group" size="sm">
 			<button
 				data-click="dropdown-btn"
@@ -151,10 +175,10 @@
 				{$t('ui.examples')}<ChevronDownOutline class="pointer-events-none h-4 w-4 text-gray-500" />
 			</button>
 			<Dropdown bind:open={dropdownOpen} class="example-dropdown">
-				{#each inputTextExample as text, index}
+				{#each $inputTextExample as text, index}
 					<DropdownItem
 						data-click={`dropdown-item-${index}`}
-						class={$selectedExampleIdx === index && 'active'}
+						class={$selectedExampleIdx === index ? 'active' : undefined}
 						on:click={() => {
 							onSelectExample(text, index);
 						}}>{text}</DropdownItem
@@ -182,16 +206,17 @@
 						contenteditable={!disabled}
 						class="text-box"
 						placeholder={$t('ui.inputPlaceholder')}
+						aria-label={$t('ui.inputPlaceholder')}
+						aria-multiline="false"
 						on:focus={onFocusInput}
 						on:input={onInput}
 						on:keydown={handleKeyDown}
 						on:click={(e) => {
 							e.stopPropagation();
 						}}
-						role="input"
-					>
-						{inputTextTemp}
-					</div>
+						role="textbox"
+						tabindex="0"
+					></div>
 					{#if !$isModelRunning}
 						<div
 							bind:this={predictRef}
@@ -199,7 +224,7 @@
 							role="none"
 							on:click={(e) => {
 								e.stopPropagation();
-								onFocusInput(e);
+								onFocusInput();
 								inputRef.focus();
 								moveCursorToEnd(inputRef);
 							}}
@@ -211,29 +236,57 @@
 				{#if $isModelRunning}
 					<div class="loading"><LoadingDots /></div>
 				{/if}
-				{#if $isMobile}
+				{#if $modelError}
+					<span class="helper-text error" role="alert">
+						{$t($modelError)}
+						{#if $modelError === 'ui.modelLoadFailed'}
+							<button
+								type="button"
+								class="retry"
+								on:click={() => modelReload.update((count) => count + 1)}>{$t('ui.retry')}</button
+							>
+						{/if}
+					</span>
+				{:else if $isMobile}
 					<span class="helper-text">{$t('ui.desktopRequired')}</span>
-				{:else if $isLoaded && $isFetchingModel}
-					<span class="helper-text">{$t('ui.modelDownloading')}</span>
+				{:else if $isFetchingModel}
+					<span class="helper-text" role="status">
+						{$modelDownloadProgress.total
+							? $t('ui.modelDownloadProgress', $modelDownloadProgress)
+							: $t('ui.modelDownloading')}
+					</span>
 				{:else if exceedLimit}
-					<span class="helper-text">{$t('ui.inputLimit', { count: wordLimit })}</span>
+					<span class="helper-text">{$t('ui.inputTokenLimit', { count: maxInputTokens })}</span>
+				{:else if generationEnded}
+					<span class="helper-text">{$t('ui.generationEnded')}</span>
 				{/if}
 			</div>
 		</ButtonGroup>
 		<button
 			data-click="generate-btn"
-			disabled={disabled || exceedLimit || exceedLimit}
+			disabled={disabled || exceedLimit || generationEnded || inputTokenCount === 0}
 			class={classNames('generate-button rounded-lg text-center text-sm shadow-sm', {
-				disabled: disabled || exceedLimit,
-				active: !(disabled || exceedLimit)
+				disabled: disabled || exceedLimit || generationEnded || inputTokenCount === 0,
+				active: !(disabled || exceedLimit || generationEnded || inputTokenCount === 0)
 			})}
 			type="submit"
-			on:click={handleSubmit}
 		>
 			{$t('ui.generate')}
 		</button>
 	</form>
 	<div class="parameters" data-click="input-parameters">
+		<label class="model-select">
+			<span class="sr-only">{$t('ui.model')}</span>
+			<select
+				value={$selectedModel}
+				disabled={modelSelectDisabled}
+				on:change={(event) => selectedModel.set(event.currentTarget.value as ModelId)}
+			>
+				{#each Object.entries(models) as [id, model]}
+					<option value={id}>{model.label}</option>
+				{/each}
+			</select>
+		</label>
 		<Temperature disabled={parameterDisabled} />
 		<Sampling disabled={parameterDisabled} />
 	</div>
@@ -242,8 +295,34 @@
 <style lang="scss">
 	.parameters {
 		display: flex;
-		gap: 1rem;
+		align-items: center;
+		gap: 0.75rem;
 	}
+	.model-select select {
+		border: 1px solid theme('colors.gray.300');
+		border-radius: 0.5rem;
+		background-color: theme('colors.white');
+		color: theme('colors.gray.700');
+		font-size: 0.75rem;
+		padding: 0.4rem 1.6rem 0.4rem 0.5rem;
+		cursor: pointer;
+	}
+	.model-select select:focus-visible {
+		outline: 2px solid theme('colors.violet.600');
+		outline-offset: 2px;
+	}
+	.model-select select:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+	.helper-text.error {
+		color: theme('colors.red.700');
+	}
+	.retry {
+		text-decoration: underline;
+		margin-left: 0.5rem;
+	}
+
 	.input-area {
 		width: 100%;
 		flex-shrink: 0;
@@ -295,7 +374,7 @@
 
 			.text-box {
 				white-space: nowrap;
-				br {
+				:global(br) {
 					display: none;
 				}
 

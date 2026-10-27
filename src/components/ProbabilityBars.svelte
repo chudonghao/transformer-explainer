@@ -21,13 +21,14 @@
 	let hoverColor = theme.colors.purple[400];
 
 	export let drawBars = () => {
-		const data = $modelData?.probabilities;
+		if (!svgEl) return;
+		const data = $modelData?.probabilities ?? [];
 
 		const svg = d3.select(svgEl);
 
 		let xScale = d3
 			.scaleLinear()
-			.domain([0, d3.max(data, (d) => d.probability)])
+			.domain([0, d3.max(data, (d) => d.probability) ?? 1])
 			.range([0, svgEl?.clientWidth - rootRem * 3]);
 
 		const groups = svg

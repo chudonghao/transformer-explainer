@@ -75,7 +75,7 @@
 		</a>
 		<!-- repo -->
 		<a
-			href="https://github.com/poloclub/transformer-explainer"
+			href="https://github.com/chudonghao/transformer-explainer"
 			target="_blank"
 			aria-label={$t('ui.sourceCode')}
 			data-click="github_btn"

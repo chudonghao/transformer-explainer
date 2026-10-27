@@ -3,7 +3,7 @@
 	import RichText from '~/i18n/RichText.svelte';
 	import { Button } from 'flowbite-svelte';
 	import { fade } from 'svelte/transition';
-	import { textbookCurrentPage } from '~/store';
+	import { selectedModel, textbookCurrentPage } from '~/store';
 	import { textPages } from '~/utils/textbookPages';
 	import TextbookNavigation from './TextbookNavigation.svelte';
 
@@ -278,7 +278,7 @@
 								{#if page.component}
 									<svelte:component this={page.component} />
 								{:else if page.content}
-									<RichText message={page.content} />
+									<RichText message={page.modelContent?.[$selectedModel] ?? page.content} />
 								{/if}
 							</div>
 						</div>
