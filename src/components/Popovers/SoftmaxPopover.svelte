@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { Card } from 'flowbite-svelte';
 	import { modelData, sampling, predictedToken, temperature } from '~/store';
 	import Katex from '~/utils/Katex.svelte';
@@ -29,25 +30,28 @@
 		class="softmax-popover-title rounded-t-md border-b border-gray-200 bg-gray-100 px-3 py-2 dark:border-gray-600 dark:bg-gray-700"
 	>
 		<h3 class="font-semibold text-gray-900">
-			Probability of <span class="highlight">"{selected?.token}"</span> token being sampled
+			{$t('ui.probabilityOf')} <span class="highlight">"{selected?.token}"</span>
+			{$t('ui.beingSampled')}
 		</h3>
 	</div>
 	<div class="softmax-popover-content">
 		<div class="formula-steps">
 			<div class="formula-step scaled">
 				<TextbookTooltip id="temperature">
-					<div class="step-title">Scaled logit</div></TextbookTooltip
+					<div class="step-title">{$t('ui.scaledLogit')}</div></TextbookTooltip
 				>
 				<div class="step-content">
 					<div class="fraction">
 						<div class="frac-top relative">
-							<span class="annotation logit"><span>logit</span><Arrow size={16} /></span>
+							<span class="annotation logit"><span>{$t('ui.logit')}</span><Arrow size={16} /></span>
 							<span class="highlight number">{getStringNumber(selected.logit)}</span>
 						</div>
 						<div class="frac-line"></div>
 						<div class="frac-bottom relative">
 							<span class="number">{$temperature}</span>
-							<span class="annotation temp"> <Arrow size={16} /><span>temperature</span></span>
+							<span class="annotation temp">
+								<Arrow size={16} /><span>{$t('ui.temperatureLowercase')}</span></span
+							>
 						</div>
 					</div>
 				</div>
@@ -88,7 +92,11 @@
 			<div class="formula-step sampling">
 				<TextbookTooltip id="sampling">
 					<div class="step-title">
-						<span>{$sampling.type === 'top-k' ? 'Top-k' : 'Top-p'} Filtering</span>
+						<span
+							>{$t('ui.filtering', {
+								method: $sampling.type === 'top-k' ? 'Top-k' : 'Top-p'
+							})}</span
+						>
 						<span class="sub-title"
 							>({$sampling.type === 'top-k' ? 'k' : 'p'}={$sampling.value})</span
 						>
@@ -100,7 +108,7 @@
 							<div class="cases">
 								<div class="case-row">
 									<span class="condition text"
-										>If logit <Katex math={'\\in'} /> Top-{$sampling.value}
+										>{$t('ui.ifLogit')} <Katex math={'\\in'} /> Top-{$sampling.value}
 									</span>
 									<span class="number" class:highlight={selected?.rank < $sampling.value}
 										>{getStringNumber(selected?.scaledLogit)}</span
@@ -108,7 +116,8 @@
 								</div>
 								<div class="case-row">
 									<span class="condition text"
-										>Otherwise <span
+										>{$t('ui.otherwise')}
+										<span
 											class="number infinity"
 											class:highlight={selected?.rank >= $sampling.value}
 											><Katex math={'-\\infty'} /></span
@@ -120,7 +129,7 @@
 							<div class="cases">
 								<div class="case-row">
 									<span class="condition text">
-										If cumulative prob ≤ {$sampling.value}
+										{$t('ui.cumulativeProbability', { value: $sampling.value })}
 									</span>
 									<span class="number" class:highlight={selected?.rank <= selected?.cutoffIndex}
 										>{getStringNumber(selected?.topPProbability)}</span
@@ -128,7 +137,8 @@
 								</div>
 								<div class="case-row">
 									<span class="condition text"
-										>Otherwise <span
+										>{$t('ui.otherwise')}
+										<span
 											class="number infinity"
 											class:highlight={selected?.rank > selected?.cutoffIndex}>0</span
 										></span
@@ -182,7 +192,7 @@
 				</div>
 			{:else}
 				<div class="formula-step norm-step">
-					<div class="step-title">Normalization</div>
+					<div class="step-title">{$t('ui.normalization')}</div>
 					<div class="step-content">
 						{#if selected?.cutoffIndex >= selected?.rank}
 							<div class="fraction">

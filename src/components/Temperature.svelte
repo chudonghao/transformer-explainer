@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { temperature } from '~/store';
 	import HelpPopover from './common/HelpPopover.svelte';
 	import Slider from './common/Slider.svelte';
@@ -34,7 +35,7 @@
 	>
 		<div class="temperature-text flex items-center gap-[2px]">
 			<TextbookTooltip id="temperature">
-				<div>Temperature</div></TextbookTooltip
+				<div>{$t('ui.temperature')}</div></TextbookTooltip
 			>
 			<!-- <HelpPopover id="temperature-help"  goTo="article-temperature">
 				{`Changes output \nprobability distribution \nand randomness \nof next token.`}

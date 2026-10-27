@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { onMount } from 'svelte';
 	import QkvWeightPopover from './popovers/QKVWeightPopover.svelte';
 	import { weightPopover, tooltip } from '~/store';
@@ -126,7 +127,7 @@
 		style="left: {x}px; top: {y}px;"
 		in:fade={{ duration: 100 }}
 	>
-		{$tooltip}
+		{$tooltip ? $t($tooltip) : ''}
 		<ArrowUpRightDownLeftOutline size="sm" />
 	</div>
 {/if}

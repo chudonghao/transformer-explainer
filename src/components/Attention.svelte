@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import HeadStack from '~/components/HeadStack.svelte';
 	import {
 		tokens,
@@ -54,7 +55,7 @@
 		data-click="attention-step-title"
 	>
 		<div class="w-max">
-			<TextbookTooltip id="self-attention">Multi-head Self Attention</TextbookTooltip>
+			<TextbookTooltip id="self-attention">{$t('ui.selfAttention')}</TextbookTooltip>
 		</div>
 	</div>
 	<div class="content relative">
@@ -71,7 +72,9 @@
 				>
 					<div class="qkv flex h-full flex-col justify-center gap-[5rem] pl-[6rem]">
 						<div class="column key">
-							<div class="head1 title"><TextbookTooltip id="qkv">Key</TextbookTooltip></div>
+							<div class="head1 title">
+								<TextbookTooltip id="qkv">{$t('ui.key')}</TextbookTooltip>
+							</div>
 
 							{#each $tokens as token, index}
 								<div
@@ -84,12 +87,17 @@
 								</div>
 							{/each}
 							<Tooltip class="popover" triggeredBy={'.step.attention .key .cell'} placement="right"
-								>Key, Head {$attentionHeadIdx + 1}, vector({$modelMeta.dimension /
-									$modelMeta.attention_head_num})</Tooltip
+								>{$t('ui.headVector', {
+									kind: $t('ui.key'),
+									head: $attentionHeadIdx + 1,
+									dimension: $modelMeta.dimension / $modelMeta.attention_head_num
+								})}</Tooltip
 							>
 						</div>
 						<div class="column query">
-							<div class="head1 title"><TextbookTooltip id="qkv">Query</TextbookTooltip></div>
+							<div class="head1 title">
+								<TextbookTooltip id="qkv">{$t('ui.query')}</TextbookTooltip>
+							</div>
 							{#each $tokens as token, index}
 								<div
 									class="head1 cell x1-12 query text-xs"
@@ -104,12 +112,17 @@
 								class="popover"
 								triggeredBy={'.step.attention .query .cell'}
 								placement="right"
-								>Query, Head {$attentionHeadIdx + 1}, vector({$modelMeta.dimension /
-									$modelMeta.attention_head_num})</Tooltip
+								>{$t('ui.headVector', {
+									kind: $t('ui.query'),
+									head: $attentionHeadIdx + 1,
+									dimension: $modelMeta.dimension / $modelMeta.attention_head_num
+								})}</Tooltip
 							>
 						</div>
 						<div class="column value">
-							<div class="head1 title"><TextbookTooltip id="qkv">Value</TextbookTooltip></div>
+							<div class="head1 title">
+								<TextbookTooltip id="qkv">{$t('ui.value')}</TextbookTooltip>
+							</div>
 							{#each $tokens as token, index}
 								<div class="head1 cell x1-12 text-xs" class:last={index === $tokens.length - 1}>
 									<span class="label float">{token}</span>
@@ -120,8 +133,11 @@
 								class="popover"
 								triggeredBy={'.step.attention .value .cell'}
 								placement="right"
-								>Value, Head {$attentionHeadIdx + 1}, vector({$modelMeta.dimension /
-									$modelMeta.attention_head_num})</Tooltip
+								>{$t('ui.headVector', {
+									kind: $t('ui.value'),
+									head: $attentionHeadIdx + 1,
+									dimension: $modelMeta.dimension / $modelMeta.attention_head_num
+								})}</Tooltip
 							>
 						</div>
 					</div>
@@ -131,7 +147,7 @@
 					<div class="head-out mx-[2rem]">
 						<div class="column out">
 							<div class="head1 title">
-								<TextbookTooltip id="output-concatenation">Out</TextbookTooltip>
+								<TextbookTooltip id="output-concatenation">{$t('ui.out')}</TextbookTooltip>
 							</div>
 							{#each $tokens as token, index}
 								<div class="head1 cell x1-12" class:last={index === $tokens.length - 1}>
@@ -139,8 +155,11 @@
 								</div>
 							{/each}
 							<Tooltip class="popover" triggeredBy={'.step.attention .out .cell'} placement="right"
-								>Attention Out, Head 1, vector({$modelMeta.dimension /
-									$modelMeta.attention_head_num})</Tooltip
+								>{$t('ui.headVector', {
+									kind: $t('ui.attentionOutput'),
+									head: $attentionHeadIdx + 1,
+									dimension: $modelMeta.dimension / $modelMeta.attention_head_num
+								})}</Tooltip
 							>
 						</div>
 					</div>
@@ -183,6 +202,8 @@
 			}
 			.title {
 				z-index: $COLUMN_TITLE_INDEX;
+				width: max-content;
+				white-space: nowrap;
 				position: absolute;
 				top: -1.7rem;
 				left: 50%;

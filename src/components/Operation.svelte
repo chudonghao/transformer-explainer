@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import classNames from 'classnames';
 	import { Popover } from 'flowbite-svelte';
 	import { vectorHeight, expandedBlock } from '~/store';
@@ -55,7 +56,7 @@
 					/> -->
 					<path d="M0,50 Q0,0 24,0"></path>
 				</svg>
-				<div class="guide-text dropout-text">Dropout</div>
+				<div class="guide-text dropout-text">{$t('ui.dropout')}</div>
 			</div>
 		{/if}
 	</div>
@@ -81,7 +82,7 @@
 					/> -->
 					<path d="M0,50 Q0,0 24,0"></path>
 				</svg>
-				<div class="guide-text ln-text">Layer Normalization</div>
+				<div class="guide-text ln-text">{$t('ui.layerNorm')}</div>
 			</div>
 		{/if}
 	</div>
@@ -89,7 +90,7 @@
 	<div class={classNames(`residual residual-start cell`, className)} class:active>
 		<div class="cursor"></div>
 		{#if head}
-			<div class="guide-text residual-text">Residual</div>
+			<div class="guide-text residual-text">{$t('ui.residual')}</div>
 		{/if}
 		<svg class="main">
 			{#if head}<path {id} class="head" d="M0,0 Q0,-16 30,-16"></path>{/if}

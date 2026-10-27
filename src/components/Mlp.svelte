@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { tokens, modelMeta, blockIdx, attentionHeadIdx, vectorHeight } from '~/store';
 	import classNames from 'classnames';
 	import { onMount, setContext } from 'svelte';
@@ -88,7 +89,7 @@
 				{/each}
 			</div>
 			<Tooltip triggeredBy={'.step.mlp .initial .cell'} class="popover" placement="right">
-				vector({$modelMeta.dimension})</Tooltip
+				{$t('ui.vector', { dimension: $modelMeta.dimension })}</Tooltip
 			>
 			<OperationGroup type="dropout" id={'mlp-first-dropout'} />
 			<OperationGroup type="residual-end" id={'embedding-residual'} />
@@ -110,7 +111,7 @@
 			</div>
 		</div>
 		<Tooltip triggeredBy={'.step.mlp .mlp-mid-column .cell'} class="popover" placement="right">
-			vector({$modelMeta.dimension * 4})</Tooltip
+			{$t('ui.vector', { dimension: $modelMeta.dimension * 4 })}</Tooltip
 		>
 		<div class="layer mlpDown out-layer relative flex justify-between">
 			<div class="activation">
@@ -141,7 +142,7 @@
 					{/each}
 				</div>
 				<Tooltip triggeredBy={'.step.mlp .mlp-out-column .cell'} class="popover" placement="right">
-					vector({$modelMeta.dimension})</Tooltip
+					{$t('ui.vector', { dimension: $modelMeta.dimension })}</Tooltip
 				>
 			</div>
 		</div>

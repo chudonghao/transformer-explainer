@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { modelMeta, tokens, rootRem } from '~/store';
 	import * as d3 from 'd3';
 	import { gsap } from '~/utils/gsap';
@@ -310,7 +311,7 @@
 	};
 </script>
 
-<WeightPopoverCard id="mlp-up" title={'MLP Expansion'} bind:isAnimationActive {timeline}>
+<WeightPopoverCard id="mlp-up" title={$t('ui.mlpExpansion')} bind:isAnimationActive {timeline}>
 	<div class="mlp-weight-popover weight-popover-content flex items-center justify-start">
 		<div class="matrix flex flex-col items-center">
 			<div class="tokens" style={`gap:${tokenGap}px`}>
@@ -321,8 +322,8 @@
 		</div>
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				Embeddings<HelpPopover id="mlp-emgeddings" 
-					>{`Embeddings transformed through attention mechanism.`}</HelpPopover
+				{$t('ui.embeddings')}<HelpPopover id="mlp-emgeddings"
+					>{$t('help.mlpExpansion.embeddings')}</HelpPopover
 				>
 			</div>
 			<Matrix
@@ -340,8 +341,8 @@
 		<div class="operator"><div class="symbol mul">&times;</div></div>
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				Expansion Weights<HelpPopover id="mlp-weights" 
-					>{`Projects embedding vectors to expanded latent space. \nParameters were learned in training, fixed in prediction.`}</HelpPopover
+				{$t('ui.expansionWeights')}<HelpPopover id="mlp-weights"
+					>{$t('help.mlpExpansion.weights')}</HelpPopover
 				>
 			</div>
 			<div class="flex gap-0">
@@ -363,9 +364,8 @@
 		<div class="operator"><div class="symbol plus">+</div></div>
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				Expansion Bias <HelpPopover id="mlp-bias" 
-					>{`Offsets added after expansion. \nParameters that learned in training, fixed in prediction.`}</HelpPopover
-				>
+				{$t('ui.expansionBias')}
+				<HelpPopover id="mlp-bias">{$t('help.mlpExpansion.bias')}</HelpPopover>
 			</div>
 			<Matrix
 				className="mlp-bias"
@@ -392,7 +392,7 @@
 			</div>
 		</div> -->
 		<div class="matrix flex flex-col items-center">
-			<div class="title">Expanded <br />Embeddings</div>
+			<div class="title">{$t('ui.expanded')} <br />{$t('ui.embeddings')}</div>
 			<div class="flex">
 				<Matrix
 					className="mlp-out"

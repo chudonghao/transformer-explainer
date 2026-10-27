@@ -118,7 +118,7 @@
 			onMouseOver: () => {
 				const paths = d3.select(`g.qkv`).selectAll('path');
 				paths.transition().duration(100).style('opacity', 1);
-				tooltip.set('click to see QKV calculation');
+				tooltip.set('ui.seeQkv');
 			},
 			onMouseOut: () => {
 				const paths = d3.select(`g.qkv`).selectAll('path');
@@ -241,7 +241,7 @@
 				d3.select('path.value-to-out').transition().duration(100).style('opacity', 0.8);
 				d3.select('path.to-attention-out').transition().duration(100).style('opacity', 0.8);
 
-				tooltip.set('click to see Attention Out calculation');
+				tooltip.set('ui.seeAttention');
 			},
 			onMouseOut: () => {
 				d3.select('path.value-to-out').transition().duration(100).style('opacity', ATTENTION_OUT);
@@ -284,7 +284,7 @@
 				d3.select('path.value-to-out').transition().duration(100).style('opacity', 0.8);
 				d3.select('path.to-attention-out').transition().duration(100).style('opacity', 0.8);
 
-				tooltip.set('click to see Attention Out calculation');
+				tooltip.set('ui.seeAttention');
 			},
 			onMouseOut: () => {
 				d3.select('path.value-to-out').transition().duration(100).style('opacity', ATTENTION_OUT);
@@ -330,7 +330,7 @@
 			onMouseOver: () => {
 				const paths = d3.select(`g.mlpUp`).selectAll('path');
 				paths.transition().duration(100).style('opacity', 0.6);
-				tooltip.set('click to see MLP process');
+				tooltip.set('ui.seeMlp');
 			},
 			onMouseOut: () => {
 				const paths = d3.select(`g.mlpUp`).selectAll('path');
@@ -372,7 +372,7 @@
 			onMouseOver: () => {
 				const paths = d3.select(`g.mlpDown`).selectAll('path');
 				paths.transition().duration(100).style('opacity', 0.6);
-				tooltip.set('click to see MLP process');
+				tooltip.set('ui.seeMlp');
 			},
 			onMouseOut: () => {
 				const paths = d3.select(`g.mlpDown`).selectAll('path');
@@ -467,7 +467,7 @@
 				onMouseOver: () => {
 					const paths = d3.select(`g.softmax`).selectAll('path');
 					paths.transition().duration(100).style('opacity', 1);
-					tooltip.set('click to see Logits calculation');
+					tooltip.set('ui.seeLogits');
 					// showTooltip('');
 				},
 				onMouseOut: () => {

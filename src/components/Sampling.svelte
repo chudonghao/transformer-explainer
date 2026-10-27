@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { Radio } from 'flowbite-svelte';
 	import { sampling, userId } from '~/store';
 	import HelpPopover from './common/HelpPopover.svelte';
@@ -29,7 +30,7 @@
 		<div class="sampling-type">
 			<div class="title flex items-center gap-[2px]">
 				<TextbookTooltip id="sampling">
-					<div>Sampling</div></TextbookTooltip
+					<div>{$t('ui.sampling')}</div></TextbookTooltip
 				>
 				<!-- <HelpPopover
 					id="sampling-help"

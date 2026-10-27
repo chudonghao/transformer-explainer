@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from '~/i18n';
+	import RichText from '~/i18n/RichText.svelte';
 	import { Button } from 'flowbite-svelte';
 	import { fade } from 'svelte/transition';
 	import { textbookCurrentPage } from '~/store';
@@ -250,15 +252,21 @@
 		on:mouseenter={handleMouseEnter}
 		on:mouseleave={handleMouseLeave}
 		role="dialog"
-		aria-label="Textbook"
+		aria-label={$t('ui.textbook')}
 		style="width: {size.width}px; height: {size.height}px;"
 	>
 		<div class="card-header">
 			<div class="flex w-full items-center justify-between">
 				<h3 class="text-lg font-semibold text-gray-900">
-					{textPages[$textbookCurrentPage].title}
+					{$t(textPages[$textbookCurrentPage].title)}
 				</h3>
-				<Button color="light" size="xs" class="close-btn" on:click={handleClose}>✕</Button>
+				<Button
+					aria-label={$t('ui.closeTextbook')}
+					color="light"
+					size="xs"
+					class="close-btn"
+					on:click={handleClose}>✕</Button
+				>
 			</div>
 		</div>
 		<div class="card-body">
@@ -270,7 +278,7 @@
 								{#if page.component}
 									<svelte:component this={page.component} />
 								{:else if page.content}
-									{@html page.content}
+									<RichText message={page.content} />
 								{/if}
 							</div>
 						</div>

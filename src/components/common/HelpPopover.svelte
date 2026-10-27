@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { Popover } from 'flowbite-svelte';
 	import { userId } from '~/store';
 	import { onClickReadMore } from '~/utils/event';
@@ -62,7 +63,7 @@
 					data-click={`textbook-link-${id}`}
 					class="text-blue-600 hover:underline"
 				>
-					Open Textbook
+					{$t('ui.openTextbook')}
 				</a>
 			</div>
 		{/if}
@@ -72,7 +73,7 @@
 				class="more-btn mt-1 text-blue-600 hover:underline"
 				on:click={(e) => onClickReadMore(e, goTo, { value: id })}
 			>
-				Read more
+				{$t('ui.readMore')}
 			</div>
 		{/if}
 	</div></Popover

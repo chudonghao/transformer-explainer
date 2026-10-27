@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { modelMeta, tokens, rootRem } from '~/store';
 	import * as d3 from 'd3';
 	import { gsap } from '~/utils/gsap';
@@ -304,7 +305,7 @@
 	};
 </script>
 
-<WeightPopoverCard id="mlp-down" title={'MLP Compression'} bind:isAnimationActive {timeline}>
+<WeightPopoverCard id="mlp-down" title={$t('ui.mlpCompression')} bind:isAnimationActive {timeline}>
 	<div class="mlp-weight-popover weight-popover-content flex items-center justify-start">
 		<div class="matrix flex flex-col items-center">
 			<div class="tokens" style={`gap:${tokenGap}px`}>
@@ -315,9 +316,8 @@
 		</div>
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				Expanded Embeddings <HelpPopover id="mlp-down-emgeddings" 
-					>{`Expanded latent vectors through MLP expansion layer.`}</HelpPopover
-				>
+				{$t('ui.expandedEmbeddings')}
+				<HelpPopover id="mlp-down-emgeddings">{$t('help.mlpCompression.embeddings')}</HelpPopover>
 			</div>
 			<div class="flex">
 				<Matrix
@@ -339,9 +339,8 @@
 		</div>
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				Compression Weights <HelpPopover id="mlp-down-weights" 
-					>{`Projects expanded latent vectors back to original space. \nParameters that learned in training, fixed in prediction.`}</HelpPopover
-				>
+				{$t('ui.compressionWeights')}
+				<HelpPopover id="mlp-down-weights">{$t('help.mlpCompression.weights')}</HelpPopover>
 			</div>
 			<div class="flex gap-0">
 				<Matrix
@@ -362,9 +361,8 @@
 		<div class="operator"><div class="symbol plus px-3">+</div></div>
 		<div class="matrix flex flex-col items-center">
 			<div class="title flex items-center gap-1">
-				Compression Bias <HelpPopover id="mlp-down-bias" 
-					>{`Offsets added after compression. \nParameters that learned in training, fixed in prediction.`}</HelpPopover
-				>
+				{$t('ui.compressionBias')}
+				<HelpPopover id="mlp-down-bias">{$t('help.mlpCompression.bias')}</HelpPopover>
 			</div>
 			<Matrix
 				className="mlp-down-bias"
@@ -383,7 +381,7 @@
 			<div class="symbol equal px-4">=</div>
 		</div>
 		<div class="matrix flex flex-col items-center">
-			<div class="title">Compressed <br />Embeddings</div>
+			<div class="title">{$t('ui.compressed')} <br />{$t('ui.embeddings')}</div>
 			<div class="flex">
 				<Matrix
 					className="mlp-down-out"

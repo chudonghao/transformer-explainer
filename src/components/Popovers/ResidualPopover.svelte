@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import type { PopoverProps } from 'flowbite-svelte/Popover.svelte';
 	import CommonPopover from './CommonPopover.svelte';
 
@@ -12,7 +13,7 @@
 
 <CommonPopover
 	className="residual-popover"
-	title="Residual Connection"
+	title={$t('ui.residualConnection')}
 	{offset}
 	{triggeredBy}
 	{trigger}
@@ -21,7 +22,7 @@
 	goTo="article-residual"
 >
 	<div class="residual-content">
-		Adds layer input to output to help preserve information.
+		{$t('ui.residualDescription')}
 	</div></CommonPopover
 >
 

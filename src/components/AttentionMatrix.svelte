@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import {
 		expandedBlock,
 		tokens,
@@ -353,7 +354,7 @@
 				{showTooltip}
 			/>
 			<TextbookTooltip id="masked-self-attention">
-				<div class="matrix-label">Dot product</div>
+				<div class="matrix-label">{$t('ui.dotProduct')}</div>
 			</TextbookTooltip>
 
 			<Tooltip class="popover tooltip">
@@ -419,7 +420,7 @@
 				/>
 			</div>
 			<TextbookTooltip id="masked-self-attention">
-				<div class="matrix-label">Scaling · Mask</div>
+				<div class="matrix-label">{$t('ui.scalingMask')}</div>
 			</TextbookTooltip>
 
 			<Tooltip class="popover tooltip">
@@ -523,7 +524,8 @@
 			/>
 
 			<div class="matrix-label flex items-center gap-1">
-				Attention <ZoomInOutline></ZoomInOutline>
+				{$t('ui.attention')}
+				<ZoomInOutline></ZoomInOutline>
 			</div>
 		</div>
 	</div>

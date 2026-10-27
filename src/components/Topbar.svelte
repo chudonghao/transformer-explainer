@@ -1,7 +1,9 @@
 <script>
+	import { t } from '~/i18n';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
+	import LanguageSwitcher from '~/components/LanguageSwitcher.svelte';
 	import InputForm from '~/components/InputForm.svelte';
 	import { ga } from '~/utils/event';
 	import Sampling from '~/components/Sampling.svelte';
@@ -24,10 +26,12 @@
 		</div>
 	</div>
 	<div class="icons flex items-center gap-3">
+		<LanguageSwitcher />
 		<!-- arxiv -->
 		<a
 			href="https://dl.acm.org/doi/pdf/10.1145/3772318.3791725"
 			target="_blank"
+			aria-label={$t('ui.researchPaper')}
 			data-click="pdf-btn"
 		>
 			<svg
@@ -47,7 +51,12 @@
 			</svg>
 		</a>
 		<!-- video -->
-		<a href="https://www.youtube.com/watch?v=ECR4oAwocjs" target="_blank" data-click="ytb-btn">
+		<a
+			href="https://www.youtube.com/watch?v=ECR4oAwocjs"
+			target="_blank"
+			aria-label={$t('ui.videoTutorial')}
+			data-click="ytb-btn"
+		>
 			<svg
 				class="h-6 w-6 text-gray-800 dark:text-white"
 				aria-hidden="true"
@@ -68,6 +77,7 @@
 		<a
 			href="https://github.com/poloclub/transformer-explainer"
 			target="_blank"
+			aria-label={$t('ui.sourceCode')}
 			data-click="github_btn"
 		>
 			<svg
@@ -129,6 +139,32 @@
 			svg {
 				fill: theme('colors.gray.600');
 			}
+		}
+	}
+	@media (max-width: 1500px) {
+		.top-bar {
+			gap: 0.75rem;
+			padding-left: 1.5rem;
+			padding-right: 1.5rem;
+		}
+		.top-bar .logo {
+			font-size: 1.6rem;
+		}
+		.top-bar .logo .small {
+			font-size: 1.4rem;
+		}
+	}
+	@media (max-width: 1200px) {
+		.top-bar {
+			flex-wrap: wrap;
+			row-gap: 0.4rem;
+		}
+		.top-bar .icons {
+			margin-left: auto;
+		}
+		.top-bar .inputs {
+			order: 3;
+			flex-basis: 100%;
 		}
 	}
 </style>

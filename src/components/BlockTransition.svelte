@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { AngleLeftOutline, AngleRightOutline } from 'flowbite-svelte-icons';
 	import { onMount, tick } from 'svelte';
 	import {
@@ -110,21 +111,21 @@
 	// transformer block bounding
 	onMount(() => {
 		const setPosition = () => {
-			const scrollLeft = window.scrollX;
-			const topbarHeight = document.querySelector('.top-bar')?.offsetHeight;
-
 			const embedding = document.querySelector('.step.qkv .content .block-start-column');
 			const block =
 				$blockIdx === $modelMeta.layer_num - 1
 					? document.querySelector('.step.transformer-blocks .content .column.final')
 					: document.querySelector('.step.transformer-blocks .content');
+			const nodes = embedding?.closest('.nodes');
+			if (!embedding || !block || !nodes) return;
 
 			const embeddingRect = embedding.getBoundingClientRect();
 			const blockRect = block.getBoundingClientRect();
+			const nodesRect = nodes.getBoundingClientRect();
 
 			boundingPos = {
-				left: embeddingRect.left + scrollLeft + rootRem,
-				top: embeddingRect.top - topbarHeight,
+				left: embeddingRect.left - nodesRect.left + rootRem,
+				top: embeddingRect.top - nodesRect.top,
 				width: blockRect.left - embeddingRect.left - rootRem
 			};
 		};
@@ -135,6 +136,7 @@
 		});
 		const elements = document?.querySelectorAll('.resize-watch');
 		elements.forEach((el) => resizeObserver.observe(el));
+		return () => resizeObserver.disconnect();
 	});
 
 	const onClickNext = (e) => {
@@ -186,15 +188,17 @@
 	class:active={$isBoundingBoxActive}
 >
 	<TextbookTooltip id="blocks">
-		<span class="title-text">Transformer Block {$blockIdxTemp + 1}</span>
+		<span class="title-text">{$t('ui.blockNumber', { number: $blockIdxTemp + 1 })}</span>
 	</TextbookTooltip>
 	<button
+		aria-label={$t('ui.previousBlock')}
 		data-click="transformer-block-prev-btn"
 		on:click={onClickPrev}
 		disabled={$isOnAnimation || $isOnBlockTransition || $blockIdxTemp === 0}
 		><AngleLeftOutline size="sm" /></button
 	>
 	<button
+		aria-label={$t('ui.nextBlock')}
 		data-click="transformer-block-next-btn"
 		on:click={onClickNext}
 		disabled={$isOnAnimation || $isOnBlockTransition || $blockIdxTemp === $modelMeta.layer_num - 1}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { GradientButton } from 'flowbite-svelte';
 	import { BookOpenSolid } from 'flowbite-svelte-icons';
 	import { fade } from 'svelte/transition';
@@ -38,6 +39,7 @@
 {#if !showTextCard}
 	<div class="floating-container" transition:fade={{ duration: 150 }}>
 		<GradientButton
+			aria-label={$t('ui.openTextbook')}
 			pill={true}
 			color="purpleToBlue"
 			class="floating-btn h-14 w-14"

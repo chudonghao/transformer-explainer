@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { AngleLeftOutline, AngleRightOutline } from 'flowbite-svelte-icons';
 	import {
 		textbookCurrentPage,
@@ -116,7 +117,13 @@
 <!-- Navigation Footer -->
 <div class="navigation-footer">
 	<!-- Left navigation area -->
-	<div class="nav-section left" on:click={handleLeftClick} role="button" tabindex="0">
+	<div
+		aria-label={$t('ui.previousPage')}
+		class="nav-section left"
+		on:click={handleLeftClick}
+		role="button"
+		tabindex="0"
+	>
 		{#if showLeftArrow}
 			<div class="nav-arrow-circle">
 				<AngleLeftOutline size="sm" />
@@ -127,6 +134,7 @@
 	<!-- Center section with progress and page counter -->
 	<div class="nav-section center">
 		<div
+			aria-label={$t('ui.lessonProgress')}
 			class="progress-bar"
 			bind:this={progressBarElement}
 			on:click={handleProgressClick}
@@ -137,11 +145,14 @@
 			<div
 				class="progress-fill"
 				class:dragging={isDragging}
-				style="width: {isDragging ? previewProgress * 100 : (($textbookCurrentPage + 1) / textPages.length) * 100}%"
+				style="width: {isDragging
+					? previewProgress * 100
+					: (($textbookCurrentPage + 1) / textPages.length) * 100}%"
 			></div>
 		</div>
 		<div class="page-counter-container">
 			<button
+				aria-label={$t('ui.lessonMenu')}
 				class="page-counter"
 				on:click={(e) => {
 					e.stopPropagation();
@@ -176,7 +187,7 @@
 								});
 							}}
 						>
-							{index + 1}. {page.title}
+							{index + 1}. {$t(page.title)}
 						</button>
 					{/each}
 				</div>
@@ -185,7 +196,13 @@
 	</div>
 
 	<!-- Right navigation area -->
-	<div class="nav-section right" on:click={handleRightClick} role="button" tabindex="0">
+	<div
+		aria-label={$t('ui.nextPage')}
+		class="nav-section right"
+		on:click={handleRightClick}
+		role="button"
+		tabindex="0"
+	>
 		{#if showRightArrow}
 			<div class="nav-arrow-circle">
 				<AngleRightOutline size="sm" />

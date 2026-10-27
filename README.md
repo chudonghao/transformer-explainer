@@ -20,19 +20,27 @@ _Proceedings of the 2026 CHI Conference on Human Factors in Computing Systems._
 
 #### Prerequisites
 
-- Node.js v20 or higher
+- Node.js 20.19+, 22.12+, or 24+ (matching the Svelte Vite plugin's supported versions)
 - NPM v10 or higher
 
 #### Steps
 
 ```bash
-git clone https://github.com/poloclub/transformer-explainer.git
+git clone https://github.com/chudonghao/transformer-explainer.git
 cd transformer-explainer
-npm install
+npm ci
 npm run dev
 ```
 
 Then, on your web browser, access http://localhost:5173.
+
+## Language Support
+
+This fork supports English and Simplified Chinese for the interface, tooltips, all 20 tutorial lessons, and the explanatory article. Use the language selector in the top bar to switch languages. The site follows your browser language on first visit and remembers your choice locally, while preserving the current input, model parameters, and tutorial position.
+
+Original screenshots and the embedded video remain in English, with translated captions and labels. Changing the interface language does not change model prompts, generated tokens, formulas, numerical values, or GPT-2's language capabilities.
+
+For translation resources, adding languages, and validation commands, see the [localization development guide](docs/i18n.md).
 
 ## Credits
 

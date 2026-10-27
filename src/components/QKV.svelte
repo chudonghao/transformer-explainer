@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '~/i18n';
 	import { tokens, modelMeta, attentionHeadIdx, vectorHeight, blockIdx } from '~/store';
 	import classNames from 'classnames';
 	import { onMount } from 'svelte';
@@ -52,7 +53,7 @@
 				{/each}
 			</div>
 			<Tooltip class="popover" triggeredBy={'.qkv .embedding-column .vector'} placement="right"
-				>vector({$modelMeta.dimension})</Tooltip
+				>{$t('ui.vector', { dimension: $modelMeta.dimension })}</Tooltip
 			>
 
 			<div class="operations flex">
@@ -107,7 +108,7 @@
 				</div>
 			{/each}
 			<Tooltip class="popover" triggeredBy={'.qkv .qkv-column .vector'} placement="right"
-				>vector({$modelMeta.dimension * 3})</Tooltip
+				>{$t('ui.vector', { dimension: $modelMeta.dimension * 3 })}</Tooltip
 			>
 		</div>
 	</div>
