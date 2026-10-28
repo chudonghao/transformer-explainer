@@ -20,7 +20,7 @@ function serialize(value) {
 const index = Number(process.argv[2]);
 assert.ok(Number.isInteger(index) && index >= 0);
 const example = JSON.parse(readFileSync(0, 'utf8'));
-const directory = new URL('../../constants/examples/gpt2-zh/', import.meta.url);
+const directory = new URL('../../constants/examples/', import.meta.url);
 mkdirSync(directory, { recursive: true });
 writeFileSync(
 	new URL(`ex${index}.js`, directory),

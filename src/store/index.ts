@@ -4,7 +4,7 @@ import * as ort from 'onnxruntime-web';
 import tailwindConfig from '../../tailwind.config';
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { textPages } from '~/utils/textbookPages';
-import { models, type ModelId } from '~/constants/models';
+import { DEFAULT_MODEL, models, type ModelId } from '~/constants/models';
 import type { PreTrainedTokenizer } from '@xenova/transformers';
 
 const { theme } = resolveConfig(tailwindConfig);
@@ -65,11 +65,11 @@ export const isExpandOrCollapseRunning = writable(false);
 
 // Each submission carries its text and, for unedited continuations, exact token IDs.
 export const modelInput = writable<ModelInput>({
-	text: models.gpt2.prompts[initialExIdx]
+	text: models[DEFAULT_MODEL].prompts[initialExIdx]
 });
 
 // selected model and meta data
-export const selectedModel = writable<ModelId>('gpt2');
+export const selectedModel = readable<ModelId>(DEFAULT_MODEL);
 export const modelMeta = derived(selectedModel, ($selectedModel) => modelMetaMap[$selectedModel]);
 export const inputTextExample = derived(
 	selectedModel,

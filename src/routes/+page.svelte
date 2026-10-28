@@ -65,7 +65,7 @@
 	class="main-section h-full w-full"
 	style={`--vector-height: ${$vectorHeight}px;--title-height: ${titleHeight}px;--content-height:${vizHeight - titleHeight}px;`}
 >
-	<!-- Tooltips bind to token elements on mount, so wait for the first model example. -->
+	<!-- Tooltips bind to token elements on mount, so wait for the first Chinese example. -->
 	{#if $modelData}
 		{#if !!$expandedBlock.id}
 			<div

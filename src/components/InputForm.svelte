@@ -25,7 +25,6 @@
 		modelError,
 		modelReload,
 		modelDownloadProgress,
-		selectedModel,
 		isOnBlockTransition,
 		userId
 	} from '~/store';
@@ -34,7 +33,7 @@
 	import Sampling from './Sampling.svelte';
 	import { completeCurrentAnimation } from '~/utils/animation';
 	import { textPages } from '~/utils/textbookPages';
-	import { models, maxInputTokens, type ModelId } from '~/constants/models';
+	import { maxInputTokens } from '~/constants/models';
 	import { prepareInput } from '~/utils/tokenization.js';
 
 	let inputRef: HTMLDivElement;
@@ -156,9 +155,12 @@
 		$isModelRunning ||
 		$expandedBlock.id !== null ||
 		!!$weightPopover;
-	$: modelSelectDisabled =
-		$isModelRunning || $isOnBlockTransition || $expandedBlock.id !== null || !!$weightPopover;
-	$: selectDisabled = modelSelectDisabled || !$modelTokenizer;
+	$: selectDisabled =
+		$isModelRunning ||
+		$isOnBlockTransition ||
+		$expandedBlock.id !== null ||
+		!!$weightPopover ||
+		!$modelTokenizer;
 	$: parameterDisabled = !!$weightPopover;
 </script>
 
@@ -275,18 +277,6 @@
 		</button>
 	</form>
 	<div class="parameters" data-click="input-parameters">
-		<label class="model-select">
-			<span class="sr-only">{$t('ui.model')}</span>
-			<select
-				value={$selectedModel}
-				disabled={modelSelectDisabled}
-				on:change={(event) => selectedModel.set(event.currentTarget.value as ModelId)}
-			>
-				{#each Object.entries(models) as [id, model]}
-					<option value={id}>{model.label}</option>
-				{/each}
-			</select>
-		</label>
 		<Temperature disabled={parameterDisabled} />
 		<Sampling disabled={parameterDisabled} />
 	</div>
@@ -297,23 +287,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-	}
-	.model-select select {
-		border: 1px solid theme('colors.gray.300');
-		border-radius: 0.5rem;
-		background-color: theme('colors.white');
-		color: theme('colors.gray.700');
-		font-size: 0.75rem;
-		padding: 0.4rem 1.6rem 0.4rem 0.5rem;
-		cursor: pointer;
-	}
-	.model-select select:focus-visible {
-		outline: 2px solid theme('colors.violet.600');
-		outline-offset: 2px;
-	}
-	.model-select select:disabled {
-		opacity: 0.5;
-		cursor: default;
 	}
 	.helper-text.error {
 		color: theme('colors.red.700');

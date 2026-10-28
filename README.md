@@ -1,3 +1,22 @@
+# Transformer Explainer 中文版
+
+基于 Transformer Explainer，提供中文界面与中文模型，通过交互式可视化帮助读者理解 GPT 等模型的工作原理。可在浏览器中输入文本，实时观察 Transformer 内部组件如何协同预测下一个词元。[在线体验](https://chudonghao.github.io/transformer-explainer/)
+
+**核心改动：**
+
+- 将界面、提示、教程和正文翻译为简体中文。
+- 以 UER 中文 GPT-2 的 INT8 量化模型替换原有英文模型。
+
+**相关链接：**
+
+- [英文原版网址](https://poloclub.github.io/transformer-explainer/)
+- [英文原版仓库](https://github.com/poloclub/transformer-explainer)
+- [中文版网址](https://chudonghao.github.io/transformer-explainer/)
+- [中文版仓库](https://github.com/chudonghao/transformer-explainer)
+- [中文模型：UER GPT-2](https://huggingface.co/uer/gpt2-chinese-cluecorpussmall)
+
+---
+
 # Transformer Explainer: Interactive Learning of Text-Generative Models
 
 Transformer Explainer is an interactive visualization tool designed to help anyone learn how Transformer-based models like GPT work. It runs a live GPT-2 model right in your browser, allowing you to experiment with your own text and observe in real time how internal components and operations of the Transformer work together to predict the next tokens. Try Transformer Explainer at http://poloclub.github.io/transformer-explainer and watch a demo video on YouTube https://youtu.be/TFUc41G2ikY.<br/><br/>

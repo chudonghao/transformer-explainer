@@ -3,7 +3,7 @@ import en from './messages/en.json';
 import zhCN from './messages/zh-CN.json';
 import { interpolate, locale, type Locale } from './locale.js';
 
-export { changeLocale, initializeLocale, locale, supportedLocales } from './locale.js';
+export { initializeLocale, locale, supportedLocales } from './locale.js';
 export type { Locale } from './locale.js';
 export type MessageKey = keyof typeof en;
 export type RichTextKey = Extract<MessageKey, `article.${string}` | `tutorial.${string}.content`>;

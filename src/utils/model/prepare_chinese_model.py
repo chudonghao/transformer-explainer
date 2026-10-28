@@ -153,7 +153,7 @@ def main():
             )
 
     subprocess.run(
-        ["npx", "--no-install", "prettier", "--write", "src/constants/examples/gpt2-zh/"],
+        ["npx", "--no-install", "prettier", "--write", "src/constants/examples/"],
         cwd=ROOT, check=True,
     )
 

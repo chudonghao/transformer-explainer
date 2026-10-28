@@ -2,10 +2,8 @@ import { base } from '$app/paths';
 import { AutoTokenizer, env, type PreTrainedTokenizer } from '@xenova/transformers';
 import * as ort from 'onnxruntime-web';
 import { get } from 'svelte/store';
-import { locale } from '~/i18n';
-import { models, type ModelId } from '~/constants/models';
+import { models } from '~/constants/models';
 import { ex0, ex1, ex2, ex3, ex4 } from '~/constants/examples';
-import * as chineseExamples from '~/constants/examples/gpt2-zh';
 import {
 	modelInput,
 	isFetchingModel,
@@ -22,8 +20,6 @@ import {
 	selectedExampleIdx,
 	selectedModel,
 	temperature,
-	tokens,
-	tokenIds,
 	userId
 } from '~/store';
 import { adjustTemperature, attentionTensorNames, fakeRunWithCachedData, runModel } from './data';
@@ -33,16 +29,10 @@ import { restoreMaskedScores } from './cachedOutputs.js';
 
 env.allowLocalModels = false;
 
-const bundledExamples = {
-	gpt2: [ex0, ex1, ex2, ex3, ex4],
-	'gpt2-zh': [
-		chineseExamples.ex0,
-		chineseExamples.ex1,
-		chineseExamples.ex2,
-		chineseExamples.ex3,
-		chineseExamples.ex4
-	]
-};
+const cachedDataMap: CachedModelData[] = [ex0, ex1, ex2, ex3, ex4].map((example) => ({
+	...example,
+	outputs: restoreMaskedScores(example.outputs)
+}));
 
 export function createModelRuntime(setActive: (active: boolean) => void) {
 	let disposed = false;
@@ -54,28 +44,12 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 	let session: ort.InferenceSession | undefined;
 	let pendingLoad = Promise.resolve();
 	let pendingRun = Promise.resolve();
-	const examples = new Map<string, CachedModelData>();
 	const getParameters = () => ({ temperature: get(temperature), sampling: get(sampling) });
 
 	async function readJson(path: string, signal: AbortSignal) {
 		const response = await fetch(`${base}/${path}`, { signal });
 		if (!response.ok) throw new Error(`Unable to load ${path}: ${response.status}`);
 		return response.json();
-	}
-
-	function readExample(id: ModelId, index: number): CachedModelData {
-		const key = `${id}:${index}`;
-		if (!examples.has(key)) {
-			const data = bundledExamples[id][index];
-			if (
-				data.prompt !== models[id].prompts[index] ||
-				data.logits.length !== models[id].vocab_size
-			) {
-				throw new Error('Example data does not match the selected model.');
-			}
-			examples.set(key, { ...data, outputs: restoreMaskedScores(data.outputs) });
-		}
-		return examples.get(key)!;
 	}
 
 	function runInput() {
@@ -103,7 +77,7 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 				if (currentSession) {
 					await runModel({ ...parameters, session: currentSession, model: models[id], input });
 				} else {
-					const cachedData = readExample(id, index);
+					const cachedData = cachedDataMap[index];
 					await fakeRunWithCachedData({ ...parameters, cachedData });
 				}
 			})
@@ -132,9 +106,6 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 		tokenizer = undefined;
 		modelTokenizer.set(undefined);
 		modelSession.set(undefined);
-		modelData.set(undefined);
-		tokens.set([]);
-		tokenIds.set([]);
 		predictedToken.set(undefined);
 		isFetchingModel.set(true);
 		modelError.set(null);
@@ -155,13 +126,12 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 				});
 				if (!isCurrent()) return;
 				tokenizer = loadedTokenizer;
-				const cachedData = readExample(id, 0);
 				modelTokenizer.set(tokenizer);
 				selectedExampleIdx.set(0);
 				modelInput.set({ text: models[id].prompts[0] });
 				setActive(true);
 				await fakeRunWithCachedData({
-					cachedData,
+					cachedData: cachedDataMap[0],
 					tokenizer,
 					getParameters,
 					isCurrent
@@ -174,15 +144,12 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 					return;
 				}
 				const started = performance.now();
-				let chunks = model.chunks;
-				if (model.manifest) {
-					const manifest = await readJson(model.manifest, signal);
-					const chunkDirectory = model.manifest.slice(0, model.manifest.lastIndexOf('/') + 1);
-					chunks = manifest.chunks.map(
-						({ file, sha256 }: { file: string; sha256: string }) =>
-							`${chunkDirectory}${file}?v=${sha256}`
-					);
-				}
+				const manifest = await readJson(model.manifest, signal);
+				const chunkDirectory = model.manifest.slice(0, model.manifest.lastIndexOf('/') + 1);
+				const chunks: string[] = manifest.chunks.map(
+					({ file, sha256 }: { file: string; sha256: string }) =>
+						`${chunkDirectory}${file}?v=${sha256}`
+				);
 				if (!isCurrent()) return;
 				modelDownloadProgress.set({ loaded: 0, total: chunks.length });
 				const { mergedArray, hasCache } = await fetchAndMergeChunks(
@@ -242,7 +209,6 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 
 	ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/';
 	ort.env.logLevel = 'error';
-	selectedModel.set(get(locale) === 'zh-CN' ? 'gpt2-zh' : 'gpt2');
 	const unsubscribe = [
 		modelInput.subscribe(runInput),
 		temperature.subscribe(updateSampling),

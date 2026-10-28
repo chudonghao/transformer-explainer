@@ -3,21 +3,16 @@ const CACHE_NAME = 'onnx-model-cache-v2';
 /** @param {string[]} urls */
 async function clearOldChunks(urls) {
 	const currentUrls = new Set(urls.map((url) => new URL(url, location.href).href));
-	const modelPaths = new Set(
-		[...currentUrls].map((value) => {
-			const url = new URL(value);
-			return url.origin + url.pathname.replace(/\.part\d+$/, '');
-		})
-	);
+	const directories = new Set([...currentUrls].map((url) => new URL('.', url).href));
 	for (const name of await caches.keys()) {
 		if (!/^onnx-model-cache(?:-v\d+)?$/.test(name)) continue;
 		const cache = await caches.open(name);
 		for (const request of await cache.keys()) {
 			const url = new URL(request.url);
 			// Cache Storage is shared by every project on this origin. Only retire
-			// old versions of the selected model; keep other selectable models.
+			// model chunks in this application's model directories.
 			if (
-				modelPaths.has(url.origin + url.pathname.replace(/\.part\d+$/, '')) &&
+				directories.has(new URL('.', url).href) &&
 				/\.onnx\.part\d+$/.test(url.pathname) &&
 				(name !== CACHE_NAME || !currentUrls.has(url.href))
 			) {

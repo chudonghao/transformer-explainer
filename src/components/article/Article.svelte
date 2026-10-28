@@ -1,6 +1,5 @@
 <script>
 	import { t } from '~/i18n';
-	import { modelMeta } from '~/store';
 	import RichText from '~/i18n/RichText.svelte';
 	import tailwindConfig from '../../../tailwind.config';
 	import resolveConfig from 'tailwindcss/resolveConfig';
@@ -13,11 +12,7 @@
 
 		<p><RichText message="article.intro.architecture" /></p>
 		<p><RichText message="article.intro.nextTokenPrediction" /></p>
-		<p>
-			<RichText
-				message={$modelMeta.wordPiece ? 'article.intro.chineseModel' : 'article.intro.gpt2'}
-			/>
-		</p>
+		<p><RichText message="article.intro.chineseModel" /></p>
 	</div>
 
 	<div class="article-section" data-click="article-overview">
@@ -46,23 +41,11 @@
 		<div class="figure-caption"><RichText message="article.embedding.figureCaption" /></div>
 		<div class="article-subsection">
 			<h3>{$t('article.embedding.tokenization.title')}</h3>
-			<p>
-				<RichText
-					message={$modelMeta.wordPiece
-						? 'article.embedding.chineseTokenization'
-						: 'article.embedding.tokenization.description'}
-				/>
-			</p>
+			<p><RichText message="article.embedding.chineseTokenization" /></p>
 		</div>
 		<div class="article-subsection" id="article-token-embedding">
 			<h3>{$t('article.embedding.tokenEmbedding.title')}</h3>
-			<p>
-				<RichText
-					message={$modelMeta.wordPiece
-						? 'article.embedding.chineseTokenEmbedding'
-						: 'article.embedding.tokenEmbedding.description'}
-				/>
-			</p>
+			<p><RichText message="article.embedding.chineseTokenEmbedding" /></p>
 		</div>
 		<div class="article-subsection" id="article-positional-embedding">
 			<h3>{$t('article.embedding.positionalEncoding.title')}</h3>
@@ -202,13 +185,7 @@
 
 	<div class="article-section" id="article-prob" data-click="article-prob">
 		<h2>{$t('article.probabilities.title')}</h2>
-		<p>
-			<RichText
-				message={$modelMeta.wordPiece
-					? 'article.probabilities.chineseProjection'
-					: 'article.probabilities.projection'}
-			/>
-		</p>
+		<p><RichText message="article.probabilities.chineseProjection" /></p>
 
 		<div class="figure py-5">
 			<img alt={$t('article.figure.softmax')} src="./article_assets/softmax.png" width="70%" />
