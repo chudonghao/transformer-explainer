@@ -6,7 +6,7 @@ import { locale } from '~/i18n';
 import { models, type ModelId } from '~/constants/models';
 import { ex0, ex1, ex2, ex3, ex4 } from '~/constants/examples';
 import {
-	inputText,
+	modelInput,
 	isFetchingModel,
 	isMobile,
 	isModelRunning,
@@ -79,10 +79,11 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 		const id = get(selectedModel);
 		const currentTokenizer = tokenizer;
 		const currentSession = session;
-		const input = get(inputText).trim();
+		const input = get(modelInput);
 		const index = get(selectedExampleIdx);
 		isModelRunning.set(true);
-		modelError.set(null);
+		// Browsing cached examples must keep a failed model download retryable.
+		if (get(modelError) !== 'ui.modelLoadFailed') modelError.set(null);
 		completeCurrentAnimation();
 		pendingRun = pendingRun
 			.then(async () => {
@@ -102,7 +103,7 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 			.catch((error) => {
 				if (isCurrent()) {
 					console.error('Model inference failed:', error);
-					modelError.set('ui.inferenceFailed');
+					if (get(modelError) !== 'ui.modelLoadFailed') modelError.set('ui.inferenceFailed');
 				}
 			})
 			.finally(() => {
@@ -120,7 +121,7 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 		const id = get(selectedModel);
 		switching = true;
 		setActive(false);
-		inputText.set(models[id].prompts[0]);
+		modelInput.set({ text: models[id].prompts[0] });
 		tokenizer = undefined;
 		modelTokenizer.set(undefined);
 		modelSession.set(undefined);
@@ -148,7 +149,7 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 				tokenizer = new Tokenizer(definition, configuration);
 				modelTokenizer.set(tokenizer);
 				selectedExampleIdx.set(0);
-				inputText.set(models[id].prompts[0]);
+				modelInput.set({ text: models[id].prompts[0] });
 				setActive(true);
 				await fakeRunWithCachedData({
 					cachedData,
@@ -233,7 +234,7 @@ export function createModelRuntime(setActive: (active: boolean) => void) {
 	ort.env.logLevel = 'error';
 	selectedModel.set(get(locale) === 'zh-CN' ? 'gpt2-zh' : 'gpt2');
 	const unsubscribe = [
-		inputText.subscribe(runInput),
+		modelInput.subscribe(runInput),
 		temperature.subscribe(updateSampling),
 		sampling.subscribe(updateSampling),
 		selectedModel.subscribe(requestLoad)

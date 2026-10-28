@@ -51,7 +51,7 @@ export const runModel = async ({
 	tokenizer: PreTrainedTokenizer;
 	session: ort.InferenceSession;
 	model: ModelMetaData & { wordPiece: boolean };
-	input: string;
+	input: ModelInput;
 	getParameters: () => { temperature: number; sampling: Sampling };
 	isCurrent?: () => boolean;
 }) => {
@@ -100,10 +100,10 @@ export const adjustTemperature = ({
 
 export const getTokenization = (
 	tokenizer: PreTrainedTokenizer,
-	input: string,
+	input: ModelInput,
 	wordPiece = false
 ) => {
-	const token_ids = encodeInput(tokenizer, input);
+	const token_ids = input.tokenIds ?? encodeInput(tokenizer, input.text);
 	return { token_ids, input_tokens: tokenLabels(tokenizer, token_ids, wordPiece) };
 };
 

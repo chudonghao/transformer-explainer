@@ -29,3 +29,21 @@ export function appendToken(tokenizer, text, tokenId, wordPiece) {
 	const separator = /[a-z0-9]$/i.test(text) && /^[a-z0-9]/i.test(token) ? ' ' : '';
 	return text + separator + token;
 }
+
+/**
+ * Only tokenize fresh text. Re-encoding a generated continuation can merge tokens
+ * (e.g. WordPiece's "be" + "##n") and change the context passed to the model.
+ * @param {import('@xenova/transformers').PreTrainedTokenizer} tokenizer
+ * @param {ModelInput} input
+ * @param {number | undefined} tokenId
+ * @param {boolean} wordPiece
+ */
+export function prepareInput(tokenizer, input, tokenId, wordPiece) {
+	const ids = input.tokenIds ?? encodeInput(tokenizer, input.text);
+	return tokenId === undefined
+		? { text: input.text, tokenIds: ids }
+		: {
+				text: appendToken(tokenizer, input.text, tokenId, wordPiece),
+				tokenIds: [...ids, tokenId]
+			};
+}

@@ -5,7 +5,7 @@
 
 	import { ChevronDownOutline } from 'flowbite-svelte-icons';
 	import {
-		inputText,
+		modelInput,
 		isModelRunning,
 		predictedToken,
 		inputTextExample,
@@ -35,7 +35,7 @@
 	import { completeCurrentAnimation } from '~/utils/animation';
 	import { textPages } from '~/utils/textbookPages';
 	import { models, maxInputTokens, type ModelId } from '~/constants/models';
-	import { appendToken, encodeInput } from '~/utils/tokenization.js';
+	import { prepareInput } from '~/utils/tokenization.js';
 
 	let inputRef: HTMLDivElement;
 	let predictRef: HTMLDivElement;
@@ -43,35 +43,46 @@
 	let useCustomInput = false;
 
 	let inputTextTemp = '';
+	let inputTokenIdsTemp: number[] | undefined;
+	let predictionDismissed = false;
 	$: {
-		const text = $inputText.trimEnd();
-		inputTextTemp = text;
-		if (inputRef) inputRef.innerText = text;
+		inputTextTemp = $modelInput.text;
+		inputTokenIdsTemp = $modelInput.tokenIds;
+		predictionDismissed = false;
 	}
+	$: if (inputRef && inputRef.innerText !== inputTextTemp) inputRef.innerText = inputTextTemp;
 
-	$: predictedTokenTemp = $predictedToken?.token || '';
+	$: predictedTokenTemp = predictionDismissed ? '' : $predictedToken?.token || '';
 
 	$: generationEnded =
 		!!predictedTokenTemp &&
 		!!$predictedToken &&
 		$modelMeta.endTokenIds.some((id) => id === $predictedToken.tokenId);
-	$: nextInput =
-		$modelTokenizer && $predictedToken && predictedTokenTemp && !generationEnded
-			? appendToken($modelTokenizer, inputTextTemp, $predictedToken.tokenId, $modelMeta.wordPiece)
-			: inputTextTemp;
-	$: inputTokenCount = $modelTokenizer ? encodeInput($modelTokenizer, nextInput).length : 0;
+	$: nextInput = $modelTokenizer
+		? prepareInput(
+				$modelTokenizer,
+				{ text: inputTextTemp, tokenIds: inputTokenIdsTemp },
+				predictedTokenTemp && !generationEnded ? $predictedToken?.tokenId : undefined,
+				$modelMeta.wordPiece
+			)
+		: { text: inputTextTemp, tokenIds: [] };
+	$: inputTokenCount = nextInput.tokenIds.length;
 	$: exceedLimit = inputTokenCount > maxInputTokens;
 
-	// Accept the prediction as text before editing, preserving WordPiece boundaries.
+	// Focusing accepts a prediction without re-tokenizing it; editing invalidates it.
 	const onFocusInput = () => {
-		if (disabled) return;
-		inputTextTemp = nextInput;
-		predictedTokenTemp = '';
+		if (disabled || generationEnded) return;
+		inputTextTemp = nextInput.text;
+		inputTokenIdsTemp = nextInput.tokenIds;
+		predictionDismissed = true;
 		inputRef.innerText = inputTextTemp;
 	};
 
 	const onInput = () => {
 		inputTextTemp = inputRef.innerText;
+		inputTokenIdsTemp = undefined;
+		predictionDismissed = true;
+		useCustomInput = true;
 	};
 
 	const handleSubmit = (e?: Event) => {
@@ -84,9 +95,7 @@
 			onFocusInput();
 			textPages.find((page) => page.id === 'how-transformers-work')?.complete?.();
 
-			inputText.update((previous) =>
-				previous === inputTextTemp ? inputTextTemp + ' ' : inputTextTemp
-			);
+			modelInput.set({ text: inputTextTemp, tokenIds: inputTokenIdsTemp });
 
 			window.dataLayer?.push({
 				event: 'generate-next-token',
@@ -114,7 +123,6 @@
 			handleSubmit(e);
 			return;
 		}
-		useCustomInput = true;
 	};
 
 	// Example select box
@@ -127,16 +135,7 @@
 		dropdownOpen = false;
 
 		selectedExampleIdx.set(i);
-		predictedTokenTemp = '';
-
-		inputTextTemp = d;
-		inputRef.innerText = inputTextTemp;
-		inputText.update((prev) => {
-			if (prev === d.trim()) {
-				return d + ' ';
-			}
-			return d.trim();
-		});
+		modelInput.set({ text: d });
 		useCustomInput = false;
 	};
 

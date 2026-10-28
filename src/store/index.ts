@@ -72,9 +72,8 @@ export const highlightedHead = writable<HighlightedToken>({
 export const expandedBlock = writable<ExpandedBlock>({ id: null });
 export const isExpandOrCollapseRunning = writable(false);
 
-// user input text
-export const inputText = writable<string>(models.gpt2.prompts[initialExIdx]);
-// export const tokens = derived(inputText, ($inputText) => $inputText.trim().split(' '));
+// Each submission carries its text and, for unedited continuations, exact token IDs.
+export const modelInput = writable<ModelInput>({ text: models.gpt2.prompts[initialExIdx] });
 
 // selected model and meta data
 const initialSelectedModel = 'gpt2';

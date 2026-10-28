@@ -5,7 +5,7 @@ import test from 'node:test';
 import { BertTokenizer, GPT2Tokenizer } from '@xenova/transformers';
 import { fetchAndMergeChunks } from '../src/utils/fetchChunks.js';
 import { restoreMaskedScores } from '../src/utils/cachedOutputs.js';
-import { appendToken, encodeInput, tokenLabels } from '../src/utils/tokenization.js';
+import { appendToken, encodeInput, prepareInput, tokenLabels } from '../src/utils/tokenization.js';
 import { ex0 } from '../src/constants/examples/ex0.js';
 
 function mockGlobal(context, name, value) {
@@ -144,6 +144,36 @@ test('Chinese browser tokenization matches exported inputs without adding CLS or
 	assert.equal(appendToken(chinese, '今天', id('好'), true), '今天好');
 	assert.equal(appendToken(chinese, 'hello', id('world'), true), 'hello world');
 	assert.equal(appendToken(chinese, 'hello', id('##s'), true), 'hellos');
+});
+
+test('WordPiece continuations retain sampled IDs until the text is edited', async () => {
+	const chinese = await tokenizer('gpt2-zh', BertTokenizer);
+	const generated = prepareInput(chinese, { text: 'be' }, 8171, true);
+	assert.equal(generated.text, 'ben');
+	assert.deepEqual(generated.tokenIds, [8815, 8171]);
+	assert.deepEqual(encodeInput(chinese, generated.text), [10016]);
+	assert.deepEqual(prepareInput(chinese, generated, undefined, true), generated);
+	assert.deepEqual(prepareInput(chinese, { text: 'ben' }, undefined, true).tokenIds, [10016]);
+	assert.deepEqual(prepareInput(chinese, generated, 8118, true).tokenIds, [8815, 8171, 8118]);
+
+	const atLimit = { text: 'be' + 'n'.repeat(31), tokenIds: [8815, ...Array(31).fill(8171)] };
+	assert.equal(prepareInput(chinese, atLimit, 8171, true).tokenIds.length, 33);
+	assert.equal(atLimit.tokenIds.length, 32);
+});
+
+test('English continuations preserve sampled boundaries and whitespace', async () => {
+	const english = await tokenizer('gpt2', GPT2Tokenizer);
+	const generated = prepareInput(english, { text: 'a' }, encodeInput(english, 'b')[0], false);
+	assert.equal(generated.text, 'ab');
+	assert.deepEqual(generated.tokenIds, [
+		...encodeInput(english, 'a'),
+		...encodeInput(english, 'b')
+	]);
+	assert.notDeepEqual(generated.tokenIds, encodeInput(english, generated.text));
+	const newline = prepareInput(english, generated, 198, false);
+	assert.equal(newline.text, 'ab\n');
+	assert.deepEqual(newline.tokenIds, [...generated.tokenIds, 198]);
+	assert.deepEqual(prepareInput(english, newline, undefined, false), newline);
 });
 
 test('published Chinese chunks match their recorded sizes and SHA-256 hashes', async () => {

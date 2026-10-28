@@ -62,6 +62,12 @@ type ModelData = {
 
 type Sampling = { type: 'top-k' | 'top-p'; value: number };
 
+type ModelInput = {
+	text: string;
+	// Preserve generated token boundaries until the user edits the text.
+	tokenIds?: number[];
+};
+
 type CachedModelData = Pick<ModelData, 'logits' | 'outputs'> & {
 	prompt: string;
 	tokens: string[];

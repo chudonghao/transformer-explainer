@@ -12,7 +12,7 @@
 		"deploy": "gh-pages -d build --nojekyll",
 		"deploy-temp": "gh-pages -d build --nojekyll --repo https://github.com/aereeeee/te-temp.git",
 		"test:i18n": "node --test tests/i18n.test.mjs",
-		"test:models": "node --test tests/models.test.mjs",
+		"test:models": "node --test tests/models.test.mjs tests/modelRuntime.test.mjs",
 		"test": "node --test tests/*.test.mjs"
 	},
 	"devDependencies": {
