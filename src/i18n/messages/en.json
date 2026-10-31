@@ -88,7 +88,6 @@
 	"ui.sourceCode": "Source code",
 	"ui.pageTitle": "Transformer Explainer: LLM Transformer Model Visually Explained",
 	"ui.pageDescription": "An interactive visualization tool showing you how transformer models work in large language models (LLM) like GPT.",
-	"ui.researchNotice": "We collect anonymous data for research.",
 	"ui.layerNormDescription": "Normalizes layer input to have a standard distribution for stability.",
 	"ui.residualDescription": "Adds layer input to output to help preserve information.",
 	"ui.dropoutDescription": "Disables randomly selected neurons. Used only during training.",

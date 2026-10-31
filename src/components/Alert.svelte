@@ -14,7 +14,6 @@
 	<div transition:fade>
 		<Alert color="blue" dismissable>
 			<div class="alert-content">
-				{$t('ui.researchNotice')}
 				<a
 					href="./consent-form.pdf"
 					class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900"
