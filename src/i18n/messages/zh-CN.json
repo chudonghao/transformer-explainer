@@ -86,7 +86,7 @@
 	"ui.researchPaper": "研究论文",
 	"ui.videoTutorial": "视频教程",
 	"ui.sourceCode": "源代码",
-	"ui.pageTitle": "Transformer Explainer：交互式理解大语言模型",
+	"ui.pageTitle": "Transformer Explainer：大语言模型 Transformer 架构的可视化讲解",
 	"ui.pageDescription": "通过交互式可视化，理解 GPT 等大语言模型中的 Transformer、注意力机制与文本生成过程。",
 	"ui.layerNormDescription": "对每个词元的特征进行归一化，使计算更稳定。",
 	"ui.residualDescription": "将该层的输入加到输出上，帮助保留信息。",
