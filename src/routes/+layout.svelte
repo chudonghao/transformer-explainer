@@ -73,6 +73,7 @@
 </script>
 
 <svelte:head>
+	<link rel="canonical" href="https://chudonghao.github.io/transformer-explainer/" />
 	<title>{$t('ui.pageTitle')}</title>
 	<meta name="title" content={$t('ui.pageTitle')} />
 	<meta name="description" content={$t('ui.pageDescription')} />
